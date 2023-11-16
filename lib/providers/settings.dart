@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
-class SettingsNotifier extends ChangeNotifier{
+class Settings{
+    String unit;
 
+    Settings.init(): unit = "";
+}
+
+class SettingsNotifier extends ChangeNotifier{
+    final Settings __settings = Settings.init();
+
+    Settings get current{
+        return __settings;
+    }
 }

@@ -27,10 +27,11 @@ class BWeather extends StatelessWidget {
                 colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
                 useMaterial3: true,
             ),
+            initialRoute: "/main",
             routes: {
                 "/" : (_)=> const Splash(),
                 "/info" : (_)=> const Info(),
-                "/main" : (_) => const Main(),
+                "/main" : (_) => const MainScreen(),
             },
         ));
     }
