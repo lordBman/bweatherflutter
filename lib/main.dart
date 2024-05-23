@@ -1,3 +1,4 @@
+import 'package:bweatherflutter/providers/cites.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/screens/info.dart';
 import 'package:bweatherflutter/screens/splash.dart';
@@ -17,12 +18,13 @@ class BWeather extends StatelessWidget {
     Widget build(BuildContext context) {
         return  MultiProvider(
             providers: [
+                ChangeNotifierProvider(create: (context) => SettingsNotifier()),
                 ChangeNotifierProvider(create: (context) => WeatherNotifer()),
                 ChangeNotifierProvider(create: (context) => ThemeNotifier()),
-                ChangeNotifierProvider(create: (context) => SettingsNotifier()),
+                ChangeNotifierProvider(create: (context) => CitiesNotifier()),
             ],
             child: MaterialApp(
-            title: 'BWeather',
+            title: 'Bsoft Weather App',
             theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
                 useMaterial3: true,

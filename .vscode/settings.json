@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/Users/Bobby/bweatherflutter/windows/runner"
+    "cmake.sourceDirectory": "C:/Users/Bobby/bweatherflutter/windows/runner",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

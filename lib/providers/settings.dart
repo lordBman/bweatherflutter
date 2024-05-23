@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
-
-class Settings{
-    String unit;
-
-    Settings.init(): unit = "";
+enum Unit{
+  celcius,
+  farighet
 }
 
 class SettingsNotifier extends ChangeNotifier{
-    final Settings __settings = Settings.init();
+    Unit __unit = Unit.celcius;
 
-    Settings get current{
-        return __settings;
+    Unit getUnit()=> __unit;
+
+    toggleUnit(){
+        switch(__unit){
+            case Unit.celcius:
+                __unit = Unit.farighet;
+                break;
+            case Unit.farighet:
+                __unit = Unit.celcius;
+        }
+        notifyListeners();
+    }
+
+    void setUnit(Unit unit){
+        if(__unit != unit){
+            __unit = unit;
+            notifyListeners();
+        }
     }
 }
