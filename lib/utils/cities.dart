@@ -1,8 +1,25 @@
+import 'dart:convert';
 class City{
     final String name, country;
     final double latitude, longitude;
 
     const City({ required this.name, required this.country, required this.latitude, required this.longitude });
+
+    factory City.fromJson(dynamic json) {
+        return City(name: json["name"] as String, country: json["country"] as String, latitude: json["latitude"] as double, longitude: json["longitude"] as double);
+    }
+
+    Map toJson() => { "name" : name, "country" : country, "latitude": latitude, "longitude": longitude };
+
+    String serialize() => jsonEncode(toJson());
+
+    @override
+    bool operator == (covariant Object other){
+        if(other is City){
+            return name == other.name;
+        }
+        return false;
+    }
 }
 
 List<City> cities = [

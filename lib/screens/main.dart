@@ -16,7 +16,7 @@ class __MainScreenState extends State<MainScreen> {
     int __currentPageIndex = 0;
     late WeatherNotifer weatherNotifer;
 
-    Widget currentPage () => [ const ForecastPage(), const Locations(), const Settings()][__currentPageIndex];
+    Widget currentPage () => [ ForcastPage(), const Locations(), const Settings()][__currentPageIndex];
 
     void home(){
         setState(() {

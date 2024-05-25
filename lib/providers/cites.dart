@@ -18,7 +18,7 @@ class CitiesNotifier extends ChangeNotifier{
         List<City> init = [];
 
         for (var element in cities) { 
-          if(element.name.toLowerCase().contains(query)){
+          if(element.name.toLowerCase().contains(query.toLowerCase()) || element.country.toLowerCase().contains(query.toLowerCase())){
               init.add(element);
           }
         }

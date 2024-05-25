@@ -25,7 +25,7 @@ class _DailyViewState extends State<DailyView> {
             mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center,
             children: [
                 Text(day(DateTime.fromMillisecondsSinceEpoch(widget.daily["dt"] * 1000).weekday), style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),),
-                Image.network("https://openweathermap.org/img/wn/${widget.daily["weather"].first["icon"]}@2x.png", height: 100),
+                Image.network("https://openweathermap.org/img/wn/${widget.daily["weather"].first["icon"]}@2x.png", height: 90, width: 100,),
                 Text("$current$unit", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.blueGrey)),
             ],
         );
