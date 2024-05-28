@@ -6,7 +6,7 @@ enum Unit{
 
 class SettingsNotifier extends ChangeNotifier{
     Unit __unit = Unit.celcius;
-    late void Function() __proceedListener;
+    //late void Function() __proceedListener;
 
     Unit getUnit()=> __unit;
 
@@ -27,6 +27,4 @@ class SettingsNotifier extends ChangeNotifier{
             notifyListeners();
         }
     }
-
-    void setProceedListener(void Function() proceedListner) =>__proceedListener = proceedListner;
 }

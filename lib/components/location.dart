@@ -62,7 +62,7 @@ class __LocationItemState extends State<LocationItem>{
                   Expanded(
                       child: DecoratedBox(
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), boxShadow: const [
-                              BoxShadow(color: Colors.grey, offset: Offset(1.0,1.0), blurRadius: 3.0, spreadRadius: 1.2),
+                              BoxShadow(color: Colors.grey, offset: Offset(0.6,0.6), blurRadius: 1.4, spreadRadius: 0.8),
                               BoxShadow(color: Colors.white, offset: Offset(0.0, 0.0), blurRadius: 0.0, spreadRadius: 0.0), 
                           ]),
                           child: Padding(

@@ -18,7 +18,7 @@ class __CityViewItemState extends State<CityViewItem> {
 
     void choose(BuildContext context){
         weatherNotifer.addCity(widget.city);
-        Navigator.pop(context, "/main");
+        Navigator.pop(context);
     }
 
     @override

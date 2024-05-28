@@ -45,8 +45,8 @@ class __SearchState extends State<Search>{
                 children: [
                     IconButton(onPressed: clear, icon: const Icon(Icons.cancel)),
                     Expanded(
-                        child: TextFormField(controller: textEditingController, textAlignVertical: TextAlignVertical.center,
-                            decoration: const InputDecoration( border: InputBorder.none),),
+                        child: TextFormField( controller: textEditingController, textAlignVertical: TextAlignVertical.center,
+                            decoration: const InputDecoration( border: InputBorder.none, hintText: "Search cities"),),
                     ),
                     FilledButton(style: const ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.deepOrangeAccent)), onPressed: clicked, child: const Icon(Icons.search_outlined, color: Colors.white,),)
                 ],

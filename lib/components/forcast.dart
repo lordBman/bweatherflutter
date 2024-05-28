@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:after_layout/after_layout.dart';
+import 'package:bweatherflutter/components/error.dart';
+import 'package:bweatherflutter/components/loading.dart';
 import 'package:bweatherflutter/components/others.dart';
 import 'package:bweatherflutter/providers/settings.dart';
 import 'package:bweatherflutter/providers/theme.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 class ForecastView extends StatefulWidget{
@@ -38,17 +38,11 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
         ForcastState forecastState = weatherNotifer.savedCities[widget.index];
 
         if(forecastState.loading){
-            return const Center( child: SizedBox(width: 60, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)), );
+            return Loading(message: forecastState.message);
         }
 
-        if(weatherNotifer.isError || forecastState.isError){
-            return const Center(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                Image(image: AssetImage('files/ic_splash.png')),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Text("Encontered an unexpected error, check your internet connection", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w300, letterSpacing: 1.4,),),
-                )
-            ],),);
+        if (forecastState.isError){
+            return const ErrorView(message: "Encontered an unexpected error when fetching Forcast, check your internet connection");
         }
         
         String currentTime(){
@@ -101,7 +95,7 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
                                 child: Others( daily: forecastState.result["daily"], hourly: forecastState.result["hourly"], ),
                             ),
                         ),))
-          ],
+            ],
         );
     }
 }

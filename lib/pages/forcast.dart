@@ -1,15 +1,18 @@
 import 'dart:async';
 
+import 'package:bweatherflutter/components/error.dart';
 import 'package:bweatherflutter/components/forcast.dart';
+import 'package:bweatherflutter/components/loading.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ForcastPage extends StatefulWidget{
+    const ForcastPage({ super.key });
+
     @override
     State<StatefulWidget> createState()=> __ForcastPage();
 }
@@ -18,7 +21,7 @@ class __ForcastPage extends State<ForcastPage>{
     late WeatherNotifer weatherNotifer;
     late StreamSubscription<List<ConnectivityResult>> subscription;
 
-    Future<void> refresh() => weatherNotifer.init();
+    Future<void> refresh() async => weatherNotifer.reload();
 
     @override
     void initState() {
@@ -35,7 +38,11 @@ class __ForcastPage extends State<ForcastPage>{
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
 
         if(weatherNotifer.loading){
-            return const Center( child: SizedBox(width: 60, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)), );
+            return Loading(message: weatherNotifer.message);
+        }
+
+        if(weatherNotifer.isError){
+            return const ErrorView(message: "Encontered an unexpected error, check your internet connection");
         }
 
         return Swiper(
@@ -47,10 +54,4 @@ class __ForcastPage extends State<ForcastPage>{
             },
             itemCount: weatherNotifer.savedCities.length,);
     }
-
-    @override
-  void dispose() {
-      subscription.cancel();
-      super.dispose();
-  }
 }

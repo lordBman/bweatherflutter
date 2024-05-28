@@ -6,6 +6,7 @@ import 'package:bweatherflutter/utils/objectio.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
 
 import 'dart:convert';
 
@@ -14,9 +15,10 @@ class ForcastState{
     dynamic result;
     bool loading = true;
     bool isError = false;
+    String message;
     dynamic error;
 
-    ForcastState({ required this.city });
+    ForcastState({ required this.city, this.message = "" });
 }
 
 class WeatherNotifer extends ChangeNotifier{
@@ -26,6 +28,9 @@ class WeatherNotifer extends ChangeNotifier{
     bool __isError = false;
     bool get isError{ return __isError; }
 
+    String __message = "Getting user current loaction";
+    String get message{ return __message; }
+
     dynamic __error;
     dynamic get error{ return __error; }
 
@@ -33,12 +38,13 @@ class WeatherNotifer extends ChangeNotifier{
     List<ForcastState> get savedCities{ return __savedCities; }
 
     late void Function() __toHomeListener;
+    late void Function() __proceedListener;
 
     WeatherNotifer(){
         init();
     }
 
-    Future<Position> __determinePosition() async {
+    Future<Position?> __determinePosition() async {
         bool serviceEnabled;
         LocationPermission permission;
 
@@ -51,14 +57,22 @@ class WeatherNotifer extends ChangeNotifier{
         if (permission == LocationPermission.denied) {
             permission = await Geolocator.requestPermission();
             if (permission == LocationPermission.denied) {
+                SystemNavigator.pop();
+                __isError = true;
+                __message = "Location permission is needed to run the Application";
                 return Future.error('Location permissions are denied');
             }
         }
       
         if (permission == LocationPermission.deniedForever) {
+            __isError = true;
+            __message = "Location permission is needed to run the Application"; 
             return Future.error('Location permissions are permanently denied, we cannot request permissions.');
         }
-        return await Geolocator.getCurrentPosition();
+
+        if(permission == LocationPermission.always || permission == LocationPermission.whileInUse){
+            return await Geolocator.getCurrentPosition();
+        }
     }
 
     /*void load(String city) async{
@@ -79,6 +93,11 @@ class WeatherNotifer extends ChangeNotifier{
     }*/
 
     Future<void> forcast(ForcastState savedCity) async{
+        savedCity.message = "Getting weather forcast for ${savedCity.city.name}";
+        savedCity.loading = true;
+        savedCity.isError = false;
+        notifyListeners();
+
         try{
             savedCity.result = (await Connections().openWeatherAPI.get("/data/3.0/onecall?lat=${savedCity.city.latitude}&lon=${savedCity.city.longitude}&exclude=minutely&appid=$apiKey&units=metric")).data;
             savedCity.loading = false;
@@ -91,23 +110,40 @@ class WeatherNotifer extends ChangeNotifier{
     }
 
     Future<void> init () async{
-        try{
-            Position position = await __determinePosition();
-            List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-            
-            City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
-            __savedCities.insert(0, ForcastState(city: city));
+        __message = "Getting user current loaction";
+        __isError = false;
+        __loading = true;
+        notifyListeners();
 
-            List<ForcastState> saved = await find();
-            __savedCities.addAll(saved);
+        try{
+            Position? position = await __determinePosition();
+            if(position != null || __isError){
+              List<Placemark> placemarks = await placemarkFromCoordinates(position!.latitude, position.longitude);
+              
+              City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
+              __savedCities.insert(0, ForcastState(city: city));
+
+              __message = "Checking for saved Cites";
+              notifyListeners();
+
+              List<ForcastState> saved = await find();
+              __savedCities.addAll(saved);
+            }
         }catch(error){
             __isError = true; 
             __error = error;
+            __message = "Encontered an unexpected error, check your internet connection";
         }
 
         __loading = false;
         notifyListeners();
+        
+        if(!__isError){
+            __proceedListener();
+        }
+    }
 
+    void initForcast(){
         if(!__isError){
             for (var savedCity in __savedCities) { 
                 forcast(savedCity);
@@ -175,14 +211,12 @@ class WeatherNotifer extends ChangeNotifier{
     }
 
     void reload(){
-        if(isError){
-            init();
-        }else{
-            for (var element in savedCities) {
-                if(element.isError){
-                    forcast(element);
-                }
+        for (var element in savedCities) {
+            if(element.isError){
+                forcast(element);
             }
         }
     }
+
+    void setProceedListener(void Function() proceedListner) =>__proceedListener = proceedListner;
 }
