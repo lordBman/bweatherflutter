@@ -1,177 +1,50 @@
+import 'dart:developer';
+
+import 'package:bweatherflutter/utils/cities.dart';
 import 'package:bweatherflutter/utils/connections.dart';
+import 'package:bweatherflutter/utils/objectio.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
 
-import 'package:json_annotation/json_annotation.dart';
-part 'weather.g.dart';
+import 'dart:convert';
 
-@JsonSerializable()
-class Weather{
-    int id;
-    String main;
-    String description;
-    String icon;
+class ForcastState{
+    City city;
+    dynamic result;
+    bool loading = true;
+    bool isError = false;
+    String message;
+    dynamic error;
 
-    Weather(this.id, this.main, this.description, this.icon);
-
-    factory Weather.fromJson(Map<String, dynamic> json)=> _$WeatherFromJson(json);
-
-    Map<String, dynamic> toJson() => _$WeatherToJson(this);
-}
-
-@JsonSerializable()
-class Current{
-    int dt;
-    int sunrise;
-    int sunset;
-    double temp;
-    double feels_like;
-    int pressure;
-    int humidity;
-    double dew_point;
-    double uvi;
-    int clouds;
-    int visibility;
-    double wind_speed;
-    int wind_deg;
-    double wind_gust;
-    List<Weather> weather;
-
-    Current(
-      this.dt, this.sunrise, this.sunset, this.clouds, this.dew_point, this.feels_like, this.humidity, this.pressure, this.temp, this.uvi,
-      this.visibility, this.weather, this.wind_deg, this.wind_gust, this.wind_speed);
-
-    factory Current.fromJson(Map<String, dynamic> json)=> _$CurrentFromJson(json);
-
-    Map<String, dynamic> toJson() => _$CurrentToJson(this);
-}
-
-@JsonSerializable()
-class Hourly{
-    int dt;
-    double temp;
-    double feels_like;
-    int pressure;
-    int humidity;
-    double dew_point;
-    double uvi;
-    int clouds;
-    int visibility;
-    double wind_speed;
-    int wind_deg;
-    double wind_gust;
-    List<Weather> weather;
-    double pop;
-
-    Hourly(
-        this.dt, this.clouds, this.dew_point, this.feels_like, this.humidity, this.pop, this.pressure, this.temp, this.uvi, this.visibility, 
-        this.weather, this.wind_deg, this.wind_gust,  this.wind_speed
-    );
-
-    factory Hourly.fromJson(Map<String, dynamic> json)=> _$HourlyFromJson(json);
-
-    Map<String, dynamic> toJson() => _$HourlyToJson(this);
-}
-
-@JsonSerializable()
-class Temp{
-    double day;
-    double min;
-    double max;
-    double night;
-    double eve;
-    double morn;
-
-    Temp(this.day, this.eve, this.max, this.min, this.morn, this.night);
-
-    factory Temp.fromJson(Map<String, dynamic> json)=> _$TempFromJson(json);
-
-    Map<String, dynamic> toJson() => _$TempToJson(this);
-}
-
-@JsonSerializable()
-class FeelsLike{
-    double day;
-    double night;
-    double eve;
-    double morn;
-
-    FeelsLike( this.day, this.eve, this.morn, this.night);
-
-    factory FeelsLike.fromJson(Map<String, dynamic> json)=> _$FeelsLikeFromJson(json);
-
-    Map<String, dynamic> toJson() => _$FeelsLikeToJson(this);
-}
-
-@JsonSerializable()
-class Daily{
-    int dt;
-    int sunrise;
-    int sunset;
-    int moonrise;
-    int moonset;
-    double moon_phase;
-    String summary;
-    Temp temp;
-    FeelsLike feels_like;
-    int pressure;
-    int humidity;
-    double dew_point;
-    double wind_speed;
-    int wind_deg;
-    double wind_gust;
-    List<Weather> weather;
-    int clouds;
-    double pop;
-    double rain;
-    double uvi;
-
-    Daily(
-        this.clouds, this.dew_point, this.dt, this.feels_like, this.humidity, this.moon_phase,
-        this.moonrise, this.moonset, this.pop, this.pressure, this.rain, this.summary, this.uvi,
-        this.sunrise, this.sunset, this.temp, this.weather, this.wind_deg,this.wind_gust, this.wind_speed
-    );
-
-    factory Daily.fromJson(Map<String, dynamic> json)=> _$DailyFromJson(json);
-
-    Map<String, dynamic> toJson() => _$DailyToJson(this);
-}
-
-@JsonSerializable()
-class Data{
-    double lat;
-    double lon;
-    String timezone;
-    int timezone_offset;
-    Current current;
-    List<Hourly> hourly;
-    List<Daily> daily;
-
-    Data(this.current, this.daily, this.hourly, this.lat, this.lon, this.timezone, this.timezone_offset);
-
-    factory Data.fromJson(Map<String, dynamic> json)=> _$DataFromJson(json);
-
-    Map<String, dynamic> toJson() => _$DataToJson(this);
+    ForcastState({ required this.city, this.message = "" });
 }
 
 class WeatherNotifer extends ChangeNotifier{
-    dynamic __result;
-    dynamic get result{ return __result; }
-
-    bool __loading = false;
+    bool __loading = true;
     bool get loading{ return __loading; }
 
     bool __isError = false;
     bool get isError{ return __isError; }
 
+    String __message = "Getting user current loaction";
+    String get message{ return __message; }
+
     dynamic __error;
     dynamic get error{ return __error; }
 
+    final List<ForcastState> __savedCities = [];
+    List<ForcastState> get savedCities{ return __savedCities; }
+
+    late void Function() __toHomeListener;
+    late void Function() __proceedListener;
+
     WeatherNotifer(){
-      init();
+        init();
     }
 
-    Future<Position> __determinePosition() async {
+    Future<Position?> __determinePosition() async {
         bool serviceEnabled;
         LocationPermission permission;
 
@@ -184,17 +57,25 @@ class WeatherNotifer extends ChangeNotifier{
         if (permission == LocationPermission.denied) {
             permission = await Geolocator.requestPermission();
             if (permission == LocationPermission.denied) {
+                SystemNavigator.pop();
+                __isError = true;
+                __message = "Location permission is needed to run the Application";
                 return Future.error('Location permissions are denied');
             }
         }
       
         if (permission == LocationPermission.deniedForever) {
+            __isError = true;
+            __message = "Location permission is needed to run the Application"; 
             return Future.error('Location permissions are permanently denied, we cannot request permissions.');
         }
-        return await Geolocator.getCurrentPosition();
+
+        if(permission == LocationPermission.always || permission == LocationPermission.whileInUse){
+            return await Geolocator.getCurrentPosition();
+        }
     }
 
-    void load(String city) async{
+    /*void load(String city) async{
         __loading = true; __isError = false; __error = "";
         notifyListeners();
         try{
@@ -209,26 +90,133 @@ class WeatherNotifer extends ChangeNotifier{
             __error = error;
             notifyListeners();
         }
+    }*/
+
+    Future<void> forcast(ForcastState savedCity) async{
+        savedCity.message = "Getting weather forcast for ${savedCity.city.name}";
+        savedCity.loading = true;
+        savedCity.isError = false;
+        notifyListeners();
+
+        try{
+            savedCity.result = (await Connections().openWeatherAPI.get("/data/3.0/onecall?lat=${savedCity.city.latitude}&lon=${savedCity.city.longitude}&exclude=minutely&appid=$apiKey&units=metric")).data;
+            savedCity.loading = false;
+        }catch(error){
+            savedCity.isError = true;
+            savedCity.error = error; 
+        }
+        savedCity.loading = false;
+        notifyListeners();
     }
 
-    void init (){
-        __loading = true;
+    Future<void> init () async{
+        __message = "Getting user current loaction";
         __isError = false;
-        __error = "";
+        __loading = true;
         notifyListeners();
-        __determinePosition().then((position) async {
-            try{ 
-                dynamic data = (await Connections().openWeatherAPI.get("/data/3.0/onecall?lat=${position.latitude}&lon=${position.longitude}&exclude=minutely&appid=$apiKey&units=metric")).data;
-                __result = data;
-                //__error = data;
-                __loading = false;//__isError = true;
-                notifyListeners();
-            }catch(error){
-                __loading = false;
-                __isError = true; 
-                __error = error;
-                notifyListeners();
+
+        try{
+            Position? position = await __determinePosition();
+            if(position != null || __isError){
+              List<Placemark> placemarks = await placemarkFromCoordinates(position!.latitude, position.longitude);
+              
+              City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
+              __savedCities.insert(0, ForcastState(city: city));
+
+              __message = "Checking for saved Cites";
+              notifyListeners();
+
+              List<ForcastState> saved = await find();
+              __savedCities.addAll(saved);
             }
-        });
+        }catch(error){
+            __isError = true; 
+            __error = error;
+            __message = "Encontered an unexpected error, check your internet connection";
+        }
+
+        __loading = false;
+        notifyListeners();
+        
+        if(!__isError){
+            __proceedListener();
+        }
     }
+
+    void initForcast(){
+        if(!__isError){
+            for (var savedCity in __savedCities) { 
+                forcast(savedCity);
+            }
+        }
+    }
+
+    bool exist(City city){
+        for (var element in __savedCities) {
+            if(element.city.name == city.name){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void addCity(City city){
+        ForcastState forcastState = ForcastState(city: city);
+        if(!exist(city)){
+            __savedCities.add(forcastState);
+            notifyListeners();
+
+            forcast(forcastState);
+            save();
+        }
+    }
+
+    void remove(int index){
+        __savedCities.removeAt(index);
+        notifyListeners();
+
+        save();
+    }
+
+    void toHome(){
+        __toHomeListener();
+    }
+
+    void setHomeListener(void Function() homelistner){
+        __toHomeListener = homelistner;
+    }
+
+    static Future<List<ForcastState>> find() async{
+        try{
+            ObjectIO objectIO = ObjectIO(folder: "data");
+            String savedObject = await objectIO.readFromFile("cities");
+
+            List savedObjsJson = jsonDecode(savedObject) as List;
+            return savedObjsJson.map((savedObjJson) =>  ForcastState(city: City.fromJson(savedObjJson))).toList();
+        }catch(error){
+            log("retrieving saved cities exception:", error: error);
+            //throw Exception("encountered an error when retrieving saved cities");
+        }
+        return [];
+    }
+
+    Future<void> save() async{
+        List<City> savedCities = __savedCities.skip(1).map((e) => e.city).toList();
+        try{
+            ObjectIO objectIO = ObjectIO(folder: "data");
+            objectIO.writeToFile("cities", jsonEncode(savedCities));
+        }catch(error){
+            log("CIties save error:", error: error);
+        }
+    }
+
+    void reload(){
+        for (var element in savedCities) {
+            if(element.isError){
+                forcast(element);
+            }
+        }
+    }
+
+    void setProceedListener(void Function() proceedListner) =>__proceedListener = proceedListner;
 }
