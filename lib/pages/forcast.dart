@@ -47,6 +47,7 @@ class __ForcastPage extends State<ForcastPage>{
 
         return Swiper(
             loop: false,
+            indicatorLayout:PageIndicatorLayout.DROP,
             itemBuilder: (context, index){ return LiquidPullToRefresh(
                 onRefresh: refresh,
                 showChildOpacityTransition: true,
