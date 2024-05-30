@@ -10,12 +10,13 @@ class OptionButtion extends StatelessWidget{
 
     @override
     Widget build(BuildContext context) {
+         final ColorScheme theme = Theme.of(context).colorScheme;
         return DecoratedBox(
-            decoration: BoxDecoration(border: Border.all(color: Colors.deepOrangeAccent, width: 2), color: active ? Colors.deepOrangeAccent : Colors.transparent, borderRadius: borderRadius),
+            decoration: BoxDecoration(border: Border.all(color: theme.secondary, width: 2), color: active ? theme.secondary : Colors.transparent, borderRadius: borderRadius),
             child: SizedBox(
               height: 40,
               child: TextButton(onPressed: onPressed,
-                  child: Text(text, style: TextStyle( color: active ? Colors.white : Colors.deepOrangeAccent, fontSize: 14, fontWeight: FontWeight.w300 ),)),
+                  child: Text(text, style: TextStyle( color: active ? Colors.white : theme.secondary, fontSize: 14, fontWeight: FontWeight.w300 ),)),
             ));
     }
 }

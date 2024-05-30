@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bweatherflutter/components/error.dart';
 import 'package:bweatherflutter/components/forcast.dart';
 import 'package:bweatherflutter/components/loading.dart';
+import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class ForcastPage extends StatefulWidget{
 
 class __ForcastPage extends State<ForcastPage>{
     late WeatherNotifer weatherNotifer;
+    late MainProvider mainProvider;
     late StreamSubscription<List<ConnectivityResult>> subscription;
 
     Future<void> refresh() async => weatherNotifer.reload();
@@ -36,6 +38,7 @@ class __ForcastPage extends State<ForcastPage>{
     @override
     Widget build(BuildContext context) {
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
+        mainProvider = Provider.of<MainProvider>(context, listen: true);
 
         if(weatherNotifer.loading){
             return Loading(message: weatherNotifer.message);
@@ -46,7 +49,7 @@ class __ForcastPage extends State<ForcastPage>{
         }
 
         return Swiper(
-            loop: false,
+            loop: false, index: mainProvider.index,
             indicatorLayout:PageIndicatorLayout.DROP,
             itemBuilder: (context, index){ return LiquidPullToRefresh(
                 onRefresh: refresh,

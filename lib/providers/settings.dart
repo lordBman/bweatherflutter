@@ -1,27 +1,25 @@
+import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
-enum Unit{
-  celcius,
-  farighet
-}
 
 class SettingsNotifier extends ChangeNotifier{
-    Unit __unit = Unit.celcius;
-    //late void Function() __proceedListener;
+    String __unit = "celcius";
+    String get unit => __unit;
 
-    Unit getUnit()=> __unit;
+    int value(double value) => __unit == "farighet" ? celciustToFahrenheit(value) : value.ceil();
+    String get unitString => __unit == "farighet" ? "°F" : "℃"; 
 
     toggleUnit(){
         switch(__unit){
-            case Unit.celcius:
-                __unit = Unit.farighet;
+            case "celcius":
+                __unit = "farighet";
                 break;
-            case Unit.farighet:
-                __unit = Unit.celcius;
+            case "farighet":
+                __unit = "celcius";
         }
         notifyListeners();
     }
 
-    void setUnit(Unit unit){
+    void setUnit(String unit){
         if(__unit != unit){
             __unit = unit;
             notifyListeners();

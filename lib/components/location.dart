@@ -1,3 +1,4 @@
+import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/settings.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/utils/utils.dart';
@@ -16,6 +17,7 @@ class LocationItem extends StatefulWidget{
 class __LocationItemState extends State<LocationItem>{
     late WeatherNotifer weatherNotifer;
     late SettingsNotifier settingsNotifier;
+    late MainProvider mainProvider;
 
     List<Widget> init(ForcastState state){
         List<Widget> init = [
@@ -27,11 +29,10 @@ class __LocationItemState extends State<LocationItem>{
         ];
 
         if(!state.loading && !state.isError){
-            int current = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(state.result["current"]["temp"]) : state.result["current"]["temp"].ceil();
-            String unit = settingsNotifier.getUnit() == Unit.farighet ? "°F" : "℃";
+            int current = settingsNotifier.value(state.result["current"]["temp"]);
             init.add(
                 Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    Text("$current$unit", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w300, color: Colors.orange)),
+                    Text("$current${settingsNotifier.unitString}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w300, color: Colors.orange)),
                     Image.network("https://openweathermap.org/img/wn/${state.result["current"]["weather"].first["icon"]}@4x.png", height: 60),
                 ],)
             );
@@ -43,6 +44,7 @@ class __LocationItemState extends State<LocationItem>{
 
     @override
     Widget build(BuildContext context) {
+        mainProvider = Provider.of<MainProvider>(context, listen: true);
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
         settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
 
@@ -55,8 +57,7 @@ class __LocationItemState extends State<LocationItem>{
             );            
         }
 
-        return Padding(
-            padding: const EdgeInsets.all(12.0),
+        return TextButton(onPressed: ()=> mainProvider.setIndex(widget.index),
             child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                   Expanded(

@@ -48,6 +48,8 @@ dependencies:
   geocoding: ^3.0.0
   connectivity_plus: ^6.0.3
   flutter_svg: ^2.0.10+1
+  elegant_notification: ^2.1.2
+  google_fonts: ^6.2.0
 
 dev_dependencies:
   build_runner: ^2.4.6

@@ -5,7 +5,6 @@ import 'package:bweatherflutter/components/error.dart';
 import 'package:bweatherflutter/components/loading.dart';
 import 'package:bweatherflutter/components/others.dart';
 import 'package:bweatherflutter/providers/settings.dart';
-import 'package:bweatherflutter/providers/theme.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,6 @@ class ForecastView extends StatefulWidget{
 }
 
 class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin<ForecastView>{
-    late ThemeNotifier notifier;
     late WeatherNotifer weatherNotifer;
     late SettingsNotifier settingsNotifier;
 
@@ -33,6 +31,8 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
+
         WeatherNotifer weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
         settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
         
@@ -51,28 +51,26 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
             return "${day(init.weekday)}, ${ init.day } ${ month(init.month) }";
         }
 
-        int current = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(forecastState.result["current"]["temp"] as double) : forecastState.result["current"]["temp"].ceil();
+        int current = settingsNotifier.value(forecastState.result["current"]["temp"] as double);
         //int like = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(forecastState.result["current"]["feels_like"]) : forecastState.result["current"]["feels_like"].ceil();
-
-        String unit = settingsNotifier.getUnit() == Unit.farighet ? "°F" : "℃";
 
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
                 Container(alignment: Alignment.centerRight, padding: const EdgeInsets.only(top: 5, right: 8), 
                     child: IconButton(icon: const Icon(Icons.add_location_alt,  size: 28),
                     onPressed: (){ Navigator.pushNamed(context, "/cities"); },
-                    color: Colors.deepOrangeAccent),),
+                    color: theme.secondary),),
                 const SizedBox(height: 15,),
                 Expanded(
                     child: Center(child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min,
                       children: [
-                          Text(forecastState.city.name, style: const TextStyle(color: Colors.blueGrey, fontSize: 36, fontWeight: FontWeight.w300)),
+                          Text(forecastState.city.name, style: TextStyle(color: theme.primary, fontSize: 36, fontWeight: FontWeight.w300)),
                           Text(forecastState.city.country, style: const TextStyle(color: Colors.blueGrey, fontSize: 14, fontWeight: FontWeight.w300)),
                           const SizedBox(height: 10,),
                           Text(currentTime() , style: const TextStyle(color: Color.fromARGB(255, 19, 28, 33), fontSize: 18, fontWeight: FontWeight.w300)),
                           Row(mainAxisSize: MainAxisSize.min,
                               children: [
-                                  Text("$current$unit", style: const TextStyle(fontSize: 85, fontWeight: FontWeight.w300, color: Colors.orange)),
+                                  Text("$current${settingsNotifier.unitString}", style: TextStyle(fontSize: 85, fontWeight: FontWeight.w300, color:  theme.primary)),
                                   Image.network("https://openweathermap.org/img/wn/${forecastState.result["current"]["weather"].first["icon"]}@4x.png", height: 140)
                               ],
                           ),

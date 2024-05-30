@@ -1,6 +1,7 @@
 import 'package:bweatherflutter/pages/forcast.dart';
 import 'package:bweatherflutter/pages/locations.dart';
 import 'package:bweatherflutter/pages/settings.dart';
+import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,29 +14,31 @@ class MainScreen extends StatefulWidget {
 }
 
 class __MainScreenState extends State<MainScreen> {
-    int __currentPageIndex = 0;
+    late MainProvider mainProvider;
     late WeatherNotifer weatherNotifer;
 
-    Widget currentPage () => [ const ForcastPage(), const Locations(), const Settings()][__currentPageIndex];
+    Widget currentPage () => [ const ForcastPage(), const Locations(), const Settings()][mainProvider.pageIndex];
 
     void home(){
-        setState(() {
-            __currentPageIndex = 0;
-        });
+        mainProvider.setPage(0);
     }
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
+        mainProvider = Provider.of<MainProvider>(context, listen: true);
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
         weatherNotifer.setHomeListener(home);
+
+        /*if(!weatherNotifer.savedCities[0].isError){
+            ElegantNotification.info(description:  const Text('This account will be updated once you exit',),).show(context);
+        }*/
+
         return Scaffold(
             body: SafeArea( child: currentPage()),
             bottomNavigationBar: NavigationBar(
-                onDestinationSelected: (int index) {
-                    setState(() { __currentPageIndex = index; });
-                },
-                indicatorColor: Colors.deepOrangeAccent,
-                selectedIndex: __currentPageIndex,
+                onDestinationSelected: (int index) => mainProvider.setPage(index),
+                selectedIndex: mainProvider.pageIndex,
                 destinations: const <Widget>[
                     NavigationDestination(selectedIcon: Icon(Icons.cloud, color: Colors.white), icon: Icon(Icons.cloud_outlined), label: 'Forcast'),
                     NavigationDestination(selectedIcon: Icon(Icons.map, color: Colors.white), icon: Icon(Icons.map_outlined), label: 'Locations'),

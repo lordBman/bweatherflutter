@@ -1,5 +1,4 @@
 import 'package:bweatherflutter/providers/settings.dart';
-import 'package:bweatherflutter/providers/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,12 +11,12 @@ class Settings extends StatefulWidget{
 
 class __SettingsState extends State<Settings>{
     late SettingsNotifier __settingsNotifier;
-    late ThemeNotifier notifier;
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
+
         __settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
-        notifier = Provider.of<ThemeNotifier>(context, listen: true);
 
         return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Padding(
@@ -37,20 +36,20 @@ class __SettingsState extends State<Settings>{
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: DecoratedBox(
-                  decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: const BorderRadius.all(Radius.circular(10))),
+                  decoration: BoxDecoration(color: theme.secondaryContainer, borderRadius: const BorderRadius.all(Radius.circular(10))),
                   child: Padding(padding: const EdgeInsets.all(8),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        const Text("Select Scale", style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w500),),
-                        ListTile(
+                        Text("Select Scale", style: TextStyle(color: theme.secondary, fontSize: 16, fontWeight: FontWeight.w500),),
+                        ListTile(selectedColor: theme.secondary,
                             title: const Text('Celcius(℃)'), horizontalTitleGap: 0,
-                            leading: Radio<Unit>(value: Unit.celcius, groupValue:  __settingsNotifier.getUnit(),
-                                onChanged: (Unit? value) { __settingsNotifier.setUnit(value!); },
+                            leading: Radio<String>(value: "celcius", groupValue:  __settingsNotifier.unit,
+                                onChanged: (String? value) { __settingsNotifier.setUnit(value!); },
                             ) ,
                         ),
-                        ListTile(
+                        ListTile(selectedColor: theme.secondary,
                             title: const Text('Fahrenheit(°F)'), horizontalTitleGap: 0,
-                            leading: Radio<Unit>(value: Unit.farighet, groupValue:  __settingsNotifier.getUnit(),
-                                onChanged: (Unit? value) { __settingsNotifier.setUnit(value!); },)
+                            leading: Radio<String>(value: "farighet", groupValue:  __settingsNotifier.unit,
+                                onChanged: (String? value) { __settingsNotifier.setUnit(value!); },)
                         )
                       ],),
                   ),
