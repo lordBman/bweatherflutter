@@ -59,7 +59,7 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
                 Container(alignment: Alignment.centerRight, padding: const EdgeInsets.only(top: 5, right: 8), 
                     child: IconButton(icon: const Icon(Icons.add_location_alt,  size: 28),
                     onPressed: (){ Navigator.pushNamed(context, "/cities"); },
-                    color: theme.secondary),),
+                    color: theme.secondaryFixed),),
                 const SizedBox(height: 15,),
                 Expanded(
                     child: Center(child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min,
@@ -70,14 +70,14 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
                           Text(currentTime() , style: const TextStyle(color: Color.fromARGB(255, 19, 28, 33), fontSize: 18, fontWeight: FontWeight.w300)),
                           Row(mainAxisSize: MainAxisSize.min,
                               children: [
-                                  Text("$current${settingsNotifier.unitString}", style: TextStyle(fontSize: 85, fontWeight: FontWeight.w300, color:  theme.primary)),
+                                  Text("$current${settingsNotifier.unitString}", style: TextStyle(fontSize: 80, fontWeight: FontWeight.w300, color:  theme.primary)),
                                   Image.network("https://openweathermap.org/img/wn/${forecastState.result["current"]["weather"].first["icon"]}@4x.png", height: 140)
                               ],
                           ),
                           //Text("feels like $like$unit", style: const TextStyle(color: Colors.blueGrey, fontSize: 14, fontWeight: FontWeight.w500)),
                           Text("${forecastState.result["current"]["weather"].first["description"]}", style: const TextStyle(color: Colors.blueGrey, letterSpacing: 1.4, fontSize: 22, fontWeight: FontWeight.w300)),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [
                                 Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
                                     Row(
@@ -95,8 +95,8 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
                                     Row(
                                         children: [
                                             SvgPicture.asset("files/leaf.svg", width: 30, colorFilter: const ColorFilter.mode( Colors.blueGrey, BlendMode.srcIn),),
-                                            const SizedBox(width: 8,),
-                                            Text("${forecastState.result["current"]["wind_speed"]} \u33A7", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
+                                            const SizedBox(width: 3,),
+                                            Text("${forecastState.result["current"]["wind_speed"]}\u33A7", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
                                         ],
                                     ),
                                     const SizedBox(height: 8,),
@@ -107,7 +107,7 @@ class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin
                                     Row(
                                         children: [
                                             const Icon(Icons.water_drop_outlined, color: Colors.blueGrey, size: 32,),
-                                            const SizedBox(width: 8,),
+                                            const SizedBox(width: 3,),
                                             Text("${forecastState.result["current"]["humidity"]}%", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
                                         ],
                                     ),

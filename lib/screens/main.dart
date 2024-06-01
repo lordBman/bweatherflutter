@@ -17,7 +17,9 @@ class __MainScreenState extends State<MainScreen> {
     late MainProvider mainProvider;
     late WeatherNotifer weatherNotifer;
 
-    Widget currentPage () => [ const ForcastPage(), const Locations(), const Settings()][mainProvider.pageIndex];
+    final pages =  [ const ForcastPage(), const Locations(), const Settings()];
+
+    Widget currentPage () =>pages[mainProvider.pageIndex];
 
     void home(){
         mainProvider.setPage(0);
@@ -35,10 +37,10 @@ class __MainScreenState extends State<MainScreen> {
         }*/
 
         return Scaffold(
-            body: SafeArea( child: currentPage()),
+            body: SafeArea( child: currentPage()), backgroundColor: theme.surface,
             bottomNavigationBar: NavigationBar(
                 onDestinationSelected: (int index) => mainProvider.setPage(index),
-                selectedIndex: mainProvider.pageIndex,
+                selectedIndex: mainProvider.pageIndex, indicatorColor: theme.secondaryFixed,
                 destinations: const <Widget>[
                     NavigationDestination(selectedIcon: Icon(Icons.cloud, color: Colors.white), icon: Icon(Icons.cloud_outlined), label: 'Forcast'),
                     NavigationDestination(selectedIcon: Icon(Icons.map, color: Colors.white), icon: Icon(Icons.map_outlined), label: 'Locations'),

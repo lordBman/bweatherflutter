@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:bweatherflutter/utils/cities.dart';
@@ -44,7 +45,7 @@ class WeatherNotifer extends ChangeNotifier{
         init();
     }
 
-    Future<Position?> __determinePosition() async {
+    FutureOr<Position?> __determinePosition() async {
         bool serviceEnabled;
         LocationPermission permission;
 

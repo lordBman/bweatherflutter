@@ -15,6 +15,7 @@ class Others extends StatefulWidget{
 
 class __OthersState extends State<Others>{
     String active = "daily";
+    late ColorScheme theme;
 
     choose(String chioce) => setState(()=>active = chioce );
 
@@ -25,11 +26,10 @@ class __OthersState extends State<Others>{
             var child = active == "hourly" ? HourlyView(hourly: widget.hourly[index]) : DailyView(daily: widget.daily[index]);
             init.add(Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: DecoratedBox( decoration: BoxDecoration(
+                child: DecoratedBox( decoration: BoxDecoration(color: theme.surfaceContainerLowest,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                         BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 2, blurRadius: 3, offset: const Offset(0, 2)),
-                        const BoxShadow(color: Colors.white, spreadRadius: 0, blurRadius: 0),
                     ]
                 ), child: child,)),
             );
@@ -41,6 +41,8 @@ class __OthersState extends State<Others>{
 
     @override
     Widget build(BuildContext context) {
+        theme = Theme.of(context).colorScheme;
+
         return Column(
             mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end,
             children: [

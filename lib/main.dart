@@ -10,17 +10,37 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/settings.dart';
-import 'providers/theme.dart';
 import 'screens/main.dart';
 
-void main() => runApp(const BWeather());
+void main() => runApp(const App());
 
-class BWeather extends StatelessWidget {
-    const BWeather({super.key});
+class App extends StatelessWidget{
+    const App({ super.key });
 
     @override
     Widget build(BuildContext context) {
-        final brightness = View.of(context).platformDispatcher.platformBrightness;
+        return MultiProvider(
+            providers: [
+                ChangeNotifierProvider(create: (context)=> SettingsNotifier()),
+                ChangeNotifierProvider(create: (context) => WeatherNotifer()),
+                ChangeNotifierProvider(create: (context) => CitiesNotifier())
+            ], child: const BWeather());
+    }
+}
+
+class BWeather extends StatefulWidget {
+    const BWeather({super.key});
+
+    @override
+    State<BWeather> createState() => __BWeatherState();
+}
+
+class __BWeatherState extends State<BWeather> {
+    late SettingsNotifier settingsNotifier;
+
+    @override
+    Widget build(BuildContext context) {
+        //final brightness = View.of(context).platformDispatcher.platformBrightness;
 
         // Retrieves the default theme for the platform
         //TextTheme textTheme = Theme.of(context).textTheme;
@@ -29,20 +49,10 @@ class BWeather extends StatelessWidget {
         TextTheme textTheme = createTextTheme(context, "Noto Sans Mono", "Acme");
         
         MaterialTheme theme = MaterialTheme(textTheme);
-        
-        return  MultiProvider(
-            providers: [
-                ChangeNotifierProvider(create: (context) => SettingsNotifier()),
-                ChangeNotifierProvider(create: (context) => WeatherNotifer()),
-                ChangeNotifierProvider(create: (context) => ThemeNotifier()),
-                ChangeNotifierProvider(create: (context) => CitiesNotifier())
-            ],
-            child: MaterialApp(
-            title: 'Bsoft Weather App',
-            debugShowCheckedModeBanner: false,
-            theme: theme.light(),
-            darkTheme: theme.dark(),
-            themeMode: ThemeMode.light,
+        settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
+        return  MaterialApp( title: 'Bsoft Weather App', debugShowCheckedModeBanner: false,
+            theme: theme.lightMediumContrast(), darkTheme: theme.dark(),
+            themeMode: settingsNotifier.themeModeValue,
             initialRoute: "/splash",
             routes: {
                 "/splash" : (_)=> const Splash(),
@@ -50,6 +60,6 @@ class BWeather extends StatelessWidget {
                 "/" : (_) => ChangeNotifierProvider(create: (context) => MainProvider(), child: const MainScreen(),),
                 "/cities" : (_) => const CitiesScreen(),
             },
-        ));
+        );
     }
 }

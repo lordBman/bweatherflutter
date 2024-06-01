@@ -48,17 +48,21 @@ class __SplashState extends State<Splash>{
                 return ErrorView(message: weatherNotifer.message);
             }
 
-            return Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
-                children: [
-                    Expanded(child: Center(child: Image.asset("files/splash.jpg", width: 240,))),
-                    Column(
+            return Scaffold(
+                body: SafeArea(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
                         children: [
-                            const SizedBox(width: 50, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)),
-                            const SizedBox(height: 10,),
-                            Text(weatherNotifer.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300),),
+                            Expanded(child: Center(child: Image.asset("files/splash.jpg", width: 240,))),
+                            Column(
+                                children: [
+                                    const SizedBox(width: 50, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)),
+                                    const SizedBox(height: 10,),
+                                    Text(weatherNotifer.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300),),
+                                ],
+                            ),
                         ],
                     ),
-                ],
+                ),
             );
         }
         
