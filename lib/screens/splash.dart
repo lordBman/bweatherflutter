@@ -16,15 +16,15 @@ class Splash extends StatefulWidget{
 
 class __SplashState extends State<Splash>{
     late StreamSubscription<List<ConnectivityResult>> subscription;
-    late WeatherNotifer weatherNotifer;
+    late WeatherNotifer? weatherNotifer;
 
      @override
     void initState() { 
         super.initState();
         subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
             if (result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.ethernet)) {
-                if(weatherNotifer != null && weatherNotifer.isError){
-                    weatherNotifer.init();
+                if(weatherNotifer != null && weatherNotifer!.isError){
+                    weatherNotifer?.init();
                 }
             }
         });
@@ -38,14 +38,14 @@ class __SplashState extends State<Splash>{
           
         });*/
 
-        weatherNotifer.setProceedListener(() {
-            weatherNotifer.initForcast();
+        weatherNotifer?.setProceedListener(() {
+            weatherNotifer?.initForcast();
             Navigator.pushReplacementNamed(context, "/");
         });
 
         Widget view(){
-            if(weatherNotifer.isError){
-                return ErrorView(message: weatherNotifer.message);
+            if(weatherNotifer!.isError){
+                return ErrorView(message: weatherNotifer!.message);
             }
 
             return Scaffold(
@@ -57,7 +57,7 @@ class __SplashState extends State<Splash>{
                                 children: [
                                     const SizedBox(width: 50, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)),
                                     const SizedBox(height: 10,),
-                                    Text(weatherNotifer.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300),),
+                                    Text(weatherNotifer!.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300),),
                                 ],
                             ),
                         ],

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class DailyView extends StatefulWidget{
-    dynamic daily;
+    final dynamic daily;
     
-    DailyView({super.key,  required this.daily });
+    const DailyView({super.key,  required this.daily });
 
     @override
     State<DailyView> createState() => _DailyViewState();
