@@ -40,9 +40,9 @@ class __ForcastPage extends State<ForcastPage>{
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
         mainProvider = Provider.of<MainProvider>(context, listen: true);
 
-        if(weatherNotifer.loading){
+        /*if(weatherNotifer.loading){
             return Loading(message: weatherNotifer.message);
-        }
+        }*/
 
         if(weatherNotifer.isError){
             return const ErrorView(message: "Encontered an unexpected error, check your internet connection");
