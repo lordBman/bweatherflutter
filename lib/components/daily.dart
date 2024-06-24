@@ -17,16 +17,17 @@ class _DailyViewState extends State<DailyView> {
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
         settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
 
-        int current = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(widget.daily["temp"]["day"]) : widget.daily["temp"]["day"].ceil();
-        String unit = settingsNotifier.getUnit() == Unit.farighet ? "°F" : "℃"; 
+        int current = settingsNotifier.value(widget.daily["temp"]["day"]);
+
         return Column(
             mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-                Text(day(DateTime.fromMillisecondsSinceEpoch(widget.daily["dt"] * 1000).weekday), style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),),
+                Text(day(DateTime.fromMillisecondsSinceEpoch(widget.daily["dt"] * 1000).weekday), style: TextStyle(color: theme.onSurface, fontWeight: FontWeight.w400),),
                 Image.network("https://openweathermap.org/img/wn/${widget.daily["weather"].first["icon"]}@2x.png", height: 90, width: 100,),
-                Text("$current$unit", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.blueGrey)),
+                Text("$current${settingsNotifier.unitString}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.blueGrey)),
             ],
         );
     }

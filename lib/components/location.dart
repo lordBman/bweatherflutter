@@ -1,3 +1,4 @@
+import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/settings.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/utils/utils.dart';
@@ -16,22 +17,23 @@ class LocationItem extends StatefulWidget{
 class __LocationItemState extends State<LocationItem>{
     late WeatherNotifer weatherNotifer;
     late SettingsNotifier settingsNotifier;
+    late MainProvider mainProvider;
+    late ColorScheme theme;
 
     List<Widget> init(ForcastState state){
         List<Widget> init = [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(state.city.name, style: const TextStyle(fontSize: 20, letterSpacing: 1.4, fontWeight: FontWeight.w300, color: Colors.deepOrangeAccent),),
+                Text(state.city.name, style: TextStyle(fontSize: 20, letterSpacing: 1.4, fontWeight: FontWeight.w300, color: theme.primary),),
                 const SizedBox(height: 4,),
-                Text(state.city.country, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),),
+                Text(state.city.country, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: theme.onSurfaceVariant),),
             ],)
         ];
 
         if(!state.loading && !state.isError){
-            int current = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(state.result["current"]["temp"]) : state.result["current"]["temp"].ceil();
-            String unit = settingsNotifier.getUnit() == Unit.farighet ? "°F" : "℃";
+            int current = settingsNotifier.value(state.result["current"]["temp"]);
             init.add(
                 Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    Text("$current$unit", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w300, color: Colors.orange)),
+                    Text("$current${settingsNotifier.unitString}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w300, color: theme.primaryFixed)),
                     Image.network("https://openweathermap.org/img/wn/${state.result["current"]["weather"].first["icon"]}@4x.png", height: 60),
                 ],)
             );
@@ -43,6 +45,8 @@ class __LocationItemState extends State<LocationItem>{
 
     @override
     Widget build(BuildContext context) {
+        theme = Theme.of(context).colorScheme;
+        mainProvider = Provider.of<MainProvider>(context, listen: true);
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
         settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
 
@@ -55,15 +59,13 @@ class __LocationItemState extends State<LocationItem>{
             );            
         }
 
-        return Padding(
-            padding: const EdgeInsets.all(12.0),
+        return TextButton(onPressed: ()=> mainProvider.setIndex(widget.index),
             child: Row(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                   Expanded(
                       child: DecoratedBox(
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), boxShadow: const [
-                              BoxShadow(color: Colors.grey, offset: Offset(0.6,0.6), blurRadius: 1.4, spreadRadius: 0.8),
-                              BoxShadow(color: Colors.white, offset: Offset(0.0, 0.0), blurRadius: 0.0, spreadRadius: 0.0), 
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: theme.surfaceContainerLowest , boxShadow: const [
+                              BoxShadow(color: Colors.grey, offset: Offset(0.6,0.6), blurRadius: 1.4, spreadRadius: 0.8), 
                           ]),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -71,7 +73,7 @@ class __LocationItemState extends State<LocationItem>{
                           )
                       ),
                   ),
-                  IconButton(onPressed: remove, icon: const Icon(Icons.cancel_outlined), padding: const EdgeInsets.all(0),),
+                  IconButton(onPressed: remove, icon: Icon(Icons.cancel_outlined, color: theme.error,), padding: const EdgeInsets.all(0),),
               ],
             ),
         );

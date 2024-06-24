@@ -38,8 +38,10 @@ class __SearchState extends State<Search>{
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
+
         return Padding(padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 2 ),
-          child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(26)),
+          child: DecoratedBox(decoration: BoxDecoration(color: theme.surfaceContainerHigh, borderRadius: BorderRadius.circular(26)),
             child: Padding(padding: const EdgeInsets.all(2),
               child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
                 children: [
@@ -48,7 +50,7 @@ class __SearchState extends State<Search>{
                         child: TextFormField( controller: textEditingController, textAlignVertical: TextAlignVertical.center,
                             decoration: const InputDecoration( border: InputBorder.none, hintText: "Search cities"),),
                     ),
-                    FilledButton(style: const ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.deepOrangeAccent)), onPressed: clicked, child: const Icon(Icons.search_outlined, color: Colors.white,),)
+                    FilledButton(style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(theme.secondaryFixed)), onPressed: clicked, child: Icon(Icons.search_outlined, color: theme.onSecondaryFixed,),)
                 ],
               ),
             ),

@@ -23,10 +23,12 @@ class __CityViewItemState extends State<CityViewItem> {
 
     @override
     Widget build(BuildContext context) {
+        final ColorScheme theme = Theme.of(context).colorScheme;
         weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
-        return IconButton(onPressed: ()=> choose(context), style: const ButtonStyle(overlayColor: MaterialStatePropertyAll(Colors.transparent), padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 0, vertical: 10))),
+
+        return IconButton(onPressed: ()=> choose(context), style: const ButtonStyle(overlayColor: WidgetStatePropertyAll(Colors.transparent), padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 0, vertical: 10))),
           icon: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-              Text(widget.city.name, style: const TextStyle(fontSize: 22, letterSpacing: 1.4, fontWeight: FontWeight.w300, color: Colors.deepOrangeAccent),),
+              Text(widget.city.name, style: TextStyle(fontSize: 22, letterSpacing: 1.4, fontWeight: FontWeight.w300, color: theme.primary),),
               Text(widget.city.country, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),),
               Row(children: [
                   Text("Lat: ${widget.city.latitude.ceil()}", style: const TextStyle(fontSize: 12 ),),

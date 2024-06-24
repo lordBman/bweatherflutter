@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:bweatherflutter/utils/cities.dart';
@@ -22,26 +23,45 @@ class ForcastState{
 }
 
 class WeatherNotifer extends ChangeNotifier{
-    bool __loading = true;
-    bool get loading{ return __loading; }
-
-    bool __isError = false;
-    bool get isError{ return __isError; }
+    bool __loading = true, __isError = false, __proceeded = false;
+    bool get loading=> __loading;
+    bool get isError=> __isError;
 
     String __message = "Getting user current loaction";
-    String get message{ return __message; }
+    String get message=> __message;
 
     dynamic __error;
-    dynamic get error{ return __error; }
+    dynamic get error => __error;
 
     final List<ForcastState> __savedCities = [];
-    List<ForcastState> get savedCities{ return __savedCities; }
+    List<ForcastState> get savedCities => __savedCities;
 
     late void Function() __toHomeListener;
     late void Function() __proceedListener;
 
+    City? __location;
+    City? get location => __location;
+
     WeatherNotifer(){
-        init();
+        __message = "Checking for saved loaction";
+        notifyListeners();
+        findLoaction().then((location)=> __location = location).whenComplete((){
+            if(location != null){
+                __savedCities.add(ForcastState(city: __location!));
+
+                __message = "Checking for saved Cites";
+                notifyListeners();
+                find().then((saved)=> __savedCities.addAll(saved)).whenComplete((){
+                    __loading = false;
+                    notifyListeners();
+
+                    __proceedListener();
+                    __proceeded = true;
+                }).whenComplete(()=> init());
+            }else{
+                init();
+            } 
+        });
     }
 
     Future<Position?> __determinePosition() async {
@@ -49,23 +69,24 @@ class WeatherNotifer extends ChangeNotifier{
         LocationPermission permission;
 
         serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (!serviceEnabled) {
+        if (!serviceEnabled && location == null) {
             return Future.error('Location services are disabled.');
         }
 
         permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
+        if (permission == LocationPermission.denied && location == null) {
             permission = await Geolocator.requestPermission();
             if (permission == LocationPermission.denied) {
-                SystemNavigator.pop();
+                await SystemNavigator.pop();
                 __isError = true;
                 __message = "Location permission is needed to run the Application";
                 return Future.error('Location permissions are denied');
             }
         }
       
-        if (permission == LocationPermission.deniedForever) {
+        if (permission == LocationPermission.deniedForever && location == null) {
             __isError = true;
+            __loading = false;
             __message = "Location permission is needed to run the Application"; 
             return Future.error('Location permissions are permanently denied, we cannot request permissions.');
         }
@@ -73,6 +94,7 @@ class WeatherNotifer extends ChangeNotifier{
         if(permission == LocationPermission.always || permission == LocationPermission.whileInUse){
             return await Geolocator.getCurrentPosition();
         }
+        return null;
     }
 
     /*void load(String city) async{
@@ -109,38 +131,42 @@ class WeatherNotifer extends ChangeNotifier{
         notifyListeners();
     }
 
-    Future<void> init () async{
+    void init (){
         __message = "Getting user current loaction";
         __isError = false;
         __loading = true;
         notifyListeners();
 
-        try{
-            Position? position = await __determinePosition();
-            if(position != null || __isError){
-              List<Placemark> placemarks = await placemarkFromCoordinates(position!.latitude, position.longitude);
-              
-              City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
-              __savedCities.insert(0, ForcastState(city: city));
-
-              __message = "Checking for saved Cites";
-              notifyListeners();
-
-              List<ForcastState> saved = await find();
-              __savedCities.addAll(saved);
+        __determinePosition().then((position){
+            if(position != null){
+                placemarkFromCoordinates(position.latitude, position.longitude).then((placemarks){
+                    City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
+                    if(__location != null && __location?.country != city.country && __location?.name != city.name){
+                        __savedCities.removeAt(0);
+                        __savedCities.insert(0, ForcastState(city: city));
+                    }else if(__location == null){
+                        __savedCities.insert(0, ForcastState(city: city));
+                    }
+                    __location = city;
+                    saveLocation(city);          
+                }).onError((error, strace){
+                    __isError = true; 
+                    __error = error;
+                    __message = "Encontered an unexpected error, check your internet connection";
+                }).whenComplete((){
+                    __loading = false;
+                    notifyListeners();
+                    if(location != null && !__proceeded){
+                        __proceedListener();
+                        __proceeded = true;
+                    }
+                });
             }
-        }catch(error){
-            __isError = true; 
+        }).onError((error, strace){
+            __loading = false;
             __error = error;
-            __message = "Encontered an unexpected error, check your internet connection";
-        }
-
-        __loading = false;
-        notifyListeners();
-        
-        if(!__isError){
-            __proceedListener();
-        }
+            notifyListeners();
+        });
     }
 
     void initForcast(){
@@ -200,6 +226,18 @@ class WeatherNotifer extends ChangeNotifier{
         return [];
     }
 
+    static Future<City?> findLoaction() async{
+        try{
+            ObjectIO objectIO = ObjectIO(folder: "data");
+            String savedObject = await objectIO.readFromFile("location");
+
+            dynamic savedObjJson = jsonDecode(savedObject);
+            return City.fromJson(savedObjJson);
+        }catch(error){
+            return Future.error("retrieving saved location exception: $error");
+        }
+    }
+
     Future<void> save() async{
         List<City> savedCities = __savedCities.skip(1).map((e) => e.city).toList();
         try{
@@ -207,6 +245,15 @@ class WeatherNotifer extends ChangeNotifier{
             objectIO.writeToFile("cities", jsonEncode(savedCities));
         }catch(error){
             log("CIties save error:", error: error);
+        }
+    }
+
+    Future<void> saveLocation(City city) async{
+        try{
+            ObjectIO objectIO = ObjectIO(folder: "data");
+            objectIO.writeToFile("location", jsonEncode(city));
+        }catch(error){
+            log("Location save error:", error: error);
         }
     }
 
