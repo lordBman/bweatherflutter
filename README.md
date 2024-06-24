@@ -5,10 +5,10 @@ Bweather is a weather application written with Flutter. It provides weather info
 ## Screenshots
 
 ### Light Mode
-![Light Mode](./Screenshot 2024-06-01 090147.png)
+![Light Mode](./Screenshot%202024-06-01%20090147.png)
 
 ### Dark Mode
-![Dark Mode](./Screenshot 2024-06-24 073214.png)
+![Dark Mode](./Screenshot%202024-06-24%20073214.png)
 
 ## Features
 
