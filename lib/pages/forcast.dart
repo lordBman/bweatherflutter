@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bweatherflutter/components/error.dart';
 import 'package:bweatherflutter/components/forcast.dart';
-import 'package:bweatherflutter/components/loading.dart';
+//import 'package:bweatherflutter/components/loading.dart';
 import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:card_swiper/card_swiper.dart';

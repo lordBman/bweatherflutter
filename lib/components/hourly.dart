@@ -1,12 +1,12 @@
 import 'package:bweatherflutter/providers/settings.dart';
-import 'package:bweatherflutter/utils/utils.dart';
+//import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class HourlyView extends StatefulWidget{
-    dynamic hourly;
+    final dynamic hourly;
 
-    HourlyView({super.key,  required this.hourly });
+    const HourlyView({super.key,  required this.hourly });
 
   @override
   State<HourlyView> createState() => _HourlyViewState();

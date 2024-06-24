@@ -1,7 +1,6 @@
 import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/settings.dart';
 import 'package:bweatherflutter/providers/weather.dart';
-import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
