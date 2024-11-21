@@ -3,7 +3,9 @@ import 'package:bweatherflutter/providers/main.dart';
 import 'package:bweatherflutter/providers/weather.dart';
 import 'package:bweatherflutter/screens/cities.dart';
 import 'package:bweatherflutter/screens/info.dart';
+import 'package:bweatherflutter/screens/not_found.dart';
 import 'package:bweatherflutter/screens/splash.dart';
+import 'package:bweatherflutter/screens/test.dart';
 import 'package:bweatherflutter/utils/theme.dart';
 import 'package:bweatherflutter/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +21,7 @@ class App extends StatelessWidget{
 
     @override
     Widget build(BuildContext context) {
-        return MultiProvider(
-            providers: [
-                ChangeNotifierProvider(create: (context)=> SettingsNotifier()),
-                ChangeNotifierProvider(create: (context) => WeatherNotifer()),
-                ChangeNotifierProvider(create: (context) => CitiesNotifier())
-            ], child: const BWeather());
+        return ChangeNotifierProvider(create: (context) => SettingsNotifier(), child: const BWeather());
     }
 }
 
@@ -40,26 +37,41 @@ class __BWeatherState extends State<BWeather> {
 
     @override
     Widget build(BuildContext context) {
-        //final brightness = View.of(context).platformDispatcher.platformBrightness;
+        TextTheme textTheme = createTextTheme(
+            context, "Noto Sans Mono", "Acme");
 
-        // Retrieves the default theme for the platform
-        //TextTheme textTheme = Theme.of(context).textTheme;
-
-        // Use with Google Fonts package to use downloadable fonts
-        TextTheme textTheme = createTextTheme(context, "Noto Sans Mono", "Acme");
-        
         MaterialTheme theme = MaterialTheme(textTheme);
-        settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
-        return  MaterialApp( title: 'Bsoft Weather App', debugShowCheckedModeBanner: false,
-            theme: theme.lightMediumContrast(), darkTheme: theme.dark(),
-            themeMode: settingsNotifier.themeModeValue,
-            initialRoute: "/splash",
-            routes: {
-                "/splash" : (_)=> const Splash(),
-                "/info" : (_)=> const Info(),
-                "/" : (_) => ChangeNotifierProvider(create: (context) => MainProvider(), child: const MainScreen(),),
-                "/cities" : (_) => const CitiesScreen(),
-            },
+        settingsNotifier = context.watch<SettingsNotifier>();
+
+        return MultiProvider(
+            providers: [
+                ChangeNotifierProvider(create: (context) => CitiesNotifier()),
+                ChangeNotifierProvider(create: (context) => MainProvider()),
+                ChangeNotifierProvider(create: (context) =>
+                    WeatherNotifier(settingsNotifier: settingsNotifier)),
+            ],
+            child: MaterialApp(title: 'BSoft Weather App',
+                debugShowCheckedModeBanner: false,
+                theme: theme.light(),
+                darkTheme: theme.dark(),
+                themeMode: settingsNotifier.themeModeValue,
+                initialRoute: Splash.routeName,
+                onGenerateRoute: (settings) {
+                    return MaterialPageRoute(builder: (context) {
+                        switch (settings.name) {
+                            case Splash.routeName:
+                                return const Splash();
+                            case Info.routeName:
+                                return const Info();
+                            case MainScreen.routeName:
+                                return MainScreen();
+                            case CitiesScreen.routeName:
+                                return const CitiesScreen();
+                            default:
+                                return const NotFound();
+                        }
+                    });
+                })
         );
     }
 }

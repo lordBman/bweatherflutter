@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:bweatherflutter/providers/settings.dart';
 import 'package:bweatherflutter/utils/cities.dart';
-import 'package:bweatherflutter/utils/connections.dart';
 import 'package:bweatherflutter/utils/objectio.dart';
+import 'package:bweatherflutter/utils/result.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,30 +12,32 @@ import 'package:flutter/services.dart';
 
 import 'dart:convert';
 
-class ForcastState{
+import 'package:uno/uno.dart';
+
+class ForecastState{
     City city;
-    dynamic result;
+    Result? result;
     bool loading = true;
     bool isError = false;
     String message;
     dynamic error;
 
-    ForcastState({ required this.city, this.message = "" });
+    ForecastState({ required this.city, this.message = "" });
 }
 
-class WeatherNotifer extends ChangeNotifier{
+class WeatherNotifier extends ChangeNotifier{
     bool __loading = true, __isError = false, __proceeded = false;
     bool get loading=> __loading;
     bool get isError=> __isError;
 
-    String __message = "Getting user current loaction";
+    String __message = "Getting user current location";
     String get message=> __message;
 
     dynamic __error;
     dynamic get error => __error;
 
-    final List<ForcastState> __savedCities = [];
-    List<ForcastState> get savedCities => __savedCities;
+    final List<ForecastState> __savedCities = [];
+    List<ForecastState> get savedCities => __savedCities;
 
     late void Function() __toHomeListener;
     late void Function() __proceedListener;
@@ -42,12 +45,22 @@ class WeatherNotifer extends ChangeNotifier{
     City? __location;
     City? get location => __location;
 
-    WeatherNotifer(){
-        __message = "Checking for saved loaction";
+    final Uno __weatherAPI = Uno(
+        baseURL: "https://api.open-meteo.com/v1/forecast",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    );
+
+    final SettingsNotifier __settingsNotifier;
+
+    WeatherNotifier({ required SettingsNotifier settingsNotifier }): __settingsNotifier = settingsNotifier{
+        __settingsNotifier.weatherNotifier = this;
+        __message = "Checking for saved location";
         notifyListeners();
-        findLoaction().then((location)=> __location = location).whenComplete((){
+        findLocation().then((location)=> __location = location).whenComplete((){
             if(location != null){
-                __savedCities.add(ForcastState(city: __location!));
+                __savedCities.add(ForecastState(city: __location!));
 
                 __message = "Checking for saved Cites";
                 notifyListeners();
@@ -97,42 +110,42 @@ class WeatherNotifer extends ChangeNotifier{
         return null;
     }
 
-    /*void load(String city) async{
-        __loading = true; __isError = false; __error = "";
-        notifyListeners();
-        try{
-            dynamic location = (await Connections().openWeatherAPI.get("/geo/1.0/direct?q=$city&limit=1&appid=$apiKey")).data;
-            __result = (await Connections().openWeatherAPI.get("/data/3.0/onecall?lat=${location[0].lat}&lon=${location[0].lon}&appid=$apiKey&units=metric")).data;
-            
-            __loading = false;
-            notifyListeners();
-        }catch(error){
-            __loading = false;
-            __isError = true; 
-            __error = error;
-            notifyListeners();
-        }
-    }*/
-
-    Future<void> forcast(ForcastState savedCity) async{
-        savedCity.message = "Getting weather forcast for ${savedCity.city.name}";
+    Future<void> forecast(ForecastState savedCity) async{
+        savedCity.message = "Getting weather forecast for ${savedCity.city.name}";
         savedCity.loading = true;
         savedCity.isError = false;
         notifyListeners();
 
         try{
-            savedCity.result = (await Connections().openWeatherAPI.get("/data/3.0/onecall?lat=${savedCity.city.latitude}&lon=${savedCity.city.longitude}&exclude=minutely&appid=$apiKey&units=metric")).data;
+            Map<String, String> params = {
+                "latitude" : savedCity.city.latitude.toString(),
+                "longitude": savedCity.city.longitude.toString(),
+                "temperature_unit": __settingsNotifier.tempUnit.serialize(),
+                "wind_speed_unit": __settingsNotifier.windSpeedUnit.serialize(),
+                "precipitation_unit": __settingsNotifier.precipitationUnit.serialize(),
+                "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,rain,weather_code,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation,cloud_cover",
+                "hourly": "temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,rain,weather_code",
+                "daily": "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,rain_sum,wind_speed_10m_max,wind_gusts_10m_max",
+                //"timezone": DateTime.now().timeZoneName
+            };
+
+            savedCity.result = Result.fromJson((await __weatherAPI.get("/", params: params)).data);
             savedCity.loading = false;
         }catch(error){
             savedCity.isError = true;
-            savedCity.error = error; 
+            savedCity.error = error;
+            if(error is UnoError){
+                log("Weather error - ${savedCity.city.name}:${error.request!.uri.toString()}", error: error);
+            }else{
+                log("Weather error - ${savedCity.city.name}", error: error);
+            }
         }
         savedCity.loading = false;
         notifyListeners();
     }
 
     void init (){
-        __message = "Getting user current loaction";
+        __message = "Getting user current location";
         __isError = false;
         __loading = true;
         notifyListeners();
@@ -140,19 +153,20 @@ class WeatherNotifer extends ChangeNotifier{
         __determinePosition().then((position){
             if(position != null){
                 placemarkFromCoordinates(position.latitude, position.longitude).then((placemarks){
-                    City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, latitude: position.latitude, longitude: position.longitude);
+                    double offset = DateTime.now().timeZoneOffset.inHours.toDouble() + DateTime.now().timeZoneOffset.inMinutes.toDouble() / 60;
+                    City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, timezone: offset, latitude: position.latitude, longitude: position.longitude);
                     if(__location != null && __location?.country != city.country && __location?.name != city.name){
                         __savedCities.removeAt(0);
-                        __savedCities.insert(0, ForcastState(city: city));
+                        __savedCities.insert(0, ForecastState(city: city));
                     }else if(__location == null){
-                        __savedCities.insert(0, ForcastState(city: city));
+                        __savedCities.insert(0, ForecastState(city: city));
                     }
                     __location = city;
                     saveLocation(city);          
                 }).onError((error, strace){
                     __isError = true; 
                     __error = error;
-                    __message = "Encontered an unexpected error, check your internet connection";
+                    __message = "Encountered an unexpected error, check your internet connection";
                 }).whenComplete((){
                     __loading = false;
                     notifyListeners();
@@ -169,10 +183,10 @@ class WeatherNotifer extends ChangeNotifier{
         });
     }
 
-    void initForcast(){
+    void initForecast(){
         if(!__isError){
             for (var savedCity in __savedCities) { 
-                forcast(savedCity);
+                forecast(savedCity);
             }
         }
     }
@@ -187,38 +201,43 @@ class WeatherNotifer extends ChangeNotifier{
     }
 
     void addCity(City city){
-        ForcastState forcastState = ForcastState(city: city);
         if(!exist(city)){
-            __savedCities.add(forcastState);
+            ForecastState forecastState = ForecastState(city: city);
+            __savedCities.add(forecastState);
             notifyListeners();
 
-            forcast(forcastState);
+            forecast(forecastState);
             save();
         }
     }
 
     void remove(int index){
-        __savedCities.removeAt(index);
-        notifyListeners();
+        try{
+            ForecastState state = __savedCities.removeAt(index);
+            notifyListeners();
+            save();
 
-        save();
+            log("I removed ${state.city.name}");
+        }catch(error){
+            log("location remove error", error: error);
+        }
     }
 
     void toHome(){
         __toHomeListener();
     }
 
-    void setHomeListener(void Function() homelistner){
-        __toHomeListener = homelistner;
+    void setHomeListener(void Function() homeListener){
+        __toHomeListener = homeListener;
     }
 
-    static Future<List<ForcastState>> find() async{
+    static Future<List<ForecastState>> find() async{
         try{
             ObjectIO objectIO = ObjectIO(folder: "data");
             String savedObject = await objectIO.readFromFile("cities");
 
             List savedObjsJson = jsonDecode(savedObject) as List;
-            return savedObjsJson.map((savedObjJson) =>  ForcastState(city: City.fromJson(savedObjJson))).toList();
+            return savedObjsJson.map((savedObjJson) =>  ForecastState(city: City.fromJson(savedObjJson))).toList();
         }catch(error){
             log("retrieving saved cities exception:", error: error);
             //throw Exception("encountered an error when retrieving saved cities");
@@ -226,7 +245,7 @@ class WeatherNotifer extends ChangeNotifier{
         return [];
     }
 
-    static Future<City?> findLoaction() async{
+    static Future<City?> findLocation() async{
         try{
             ObjectIO objectIO = ObjectIO(folder: "data");
             String savedObject = await objectIO.readFromFile("location");
@@ -244,7 +263,7 @@ class WeatherNotifer extends ChangeNotifier{
             ObjectIO objectIO = ObjectIO(folder: "data");
             objectIO.writeToFile("cities", jsonEncode(savedCities));
         }catch(error){
-            log("CIties save error:", error: error);
+            log("Cities save error:", error: error);
         }
     }
 
@@ -257,13 +276,17 @@ class WeatherNotifer extends ChangeNotifier{
         }
     }
 
-    void reload(){
+    Future<void> reload({ bool force = false }) async{
         for (var element in savedCities) {
-            if(element.isError){
-                forcast(element);
+            if(element.isError || force){
+                forecast(element);
             }
         }
     }
 
-    void setProceedListener(void Function() proceedListner) =>__proceedListener = proceedListner;
+    Future<void> reloadCityForecast(ForecastState state) async{
+        await forecast(state);
+    }
+
+    void setProceedListener(void Function() proceedListener) =>__proceedListener = proceedListener;
 }

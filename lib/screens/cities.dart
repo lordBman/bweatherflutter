@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CitiesScreen extends StatefulWidget{
+    static const String routeName = "cities";
+
     const CitiesScreen({super.key});
 
     @override
@@ -18,55 +20,41 @@ class __CitiesScreenState extends State<CitiesScreen>{
     int index = 0;
 
     void search(String query){
-      setState(() {
-          index = 1;
-      });
-
       citiesNotifier.search(query).then((value) {
           setState(() {
               results = value;
-              index = 2;
+              index = 1;
           });
       });
     }
+
     void cleared(){
-        setState(() {
-            index = 0;
-        });
+        setState(() { index = 0; });
     }
 
     @override
     Widget build(BuildContext context) {
-        citiesNotifier = Provider.of<CitiesNotifier>(context, listen: true);
-
-        void back() => Navigator.pop(context);
+        citiesNotifier = context.watch<CitiesNotifier>();
+        final ColorScheme theme = Theme.of(context).colorScheme;
 
         return Scaffold(
-            body: SafeArea( child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(
-                children: [
-                    IconButton(onPressed: back, icon: const Icon(Icons.arrow_back)),
-                    const SizedBox(width: 4,),
-                    Expanded(child: Search(onSearch: search, cleared: cleared)),
+            body: CustomScrollView(
+                slivers: [
+                    SliverAppBar(title: const Text("Cities"), titleSpacing: 0, expandedHeight: 110,
+                        flexibleSpace: FlexibleSpaceBar(expandedTitleScale: 1,
+                            titlePadding: const EdgeInsets.only(left: 50, bottom: 8, right: 8),
+                            title: Search(onSearch: search, cleared: cleared),),),
+                    SliverFillRemaining(child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal:  10.0),
+                      child: IndexedStack(index: index , children: [
+                          const CityList(),
+                          ListView.separated(
+                              itemCount: results.length, itemBuilder: (context, index)=> CityViewItem(city: results[index]),
+                              separatorBuilder: (context, index) => const Divider(height: 0.3),
+                          )
+                      ],),
+                    ),)
                 ],
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-                child: IndexedStack(index: index , children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: CityList(),
-                    ),
-                    const Center(child: Text("Loading"),),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ListView.separated(
-                        itemCount: results.length, itemBuilder: (context, index)=> CityViewItem(city: results[index]),
-                        separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.blueGrey,),
-                      ),
-                    )
-                ],),
-            ),
-        ],)),);
+            ),);
     }
 }

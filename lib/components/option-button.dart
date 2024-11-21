@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class OptionButtion extends StatelessWidget{
+class OptionButton extends StatelessWidget{
     final bool active;
     final String text;
     final Function() onPressed;
     final BorderRadius borderRadius;
 
-    const OptionButtion({super.key,  required this.active, required this.text, required this.onPressed, required this.borderRadius});
+    const OptionButton({super.key,  required this.active, required this.text, required this.onPressed, required this.borderRadius});
 
     @override
     Widget build(BuildContext context) {
@@ -22,11 +22,11 @@ class OptionButtion extends StatelessWidget{
 }
 
 
-class LeftOptionButton extends OptionButtion{
+class LeftOptionButton extends OptionButton{
     const LeftOptionButton({super.key, required super.active, required super.text, required super.onPressed}): super(borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), bottomLeft: Radius.circular(6)));
 }
 
-class RightOptionButton extends OptionButtion{
+class RightOptionButton extends OptionButton{
     const RightOptionButton({super.key, required super.active, required super.text, required super.onPressed}): super(borderRadius: const BorderRadius.only(bottomRight: Radius.circular(6), topRight: Radius.circular(6)));
 }
 

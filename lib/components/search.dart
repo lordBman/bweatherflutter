@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Search extends StatefulWidget{
@@ -13,21 +14,22 @@ class Search extends StatefulWidget{
 
 class __SearchState extends State<Search>{
     TextEditingController textEditingController = TextEditingController();
-    bool isEmpty = false;
 
     @override
     void initState() {
         super.initState();
         textEditingController.addListener(() {
-            if(isEmpty){
+            if(textEditingController.text.isEmpty){
                 widget.cleared();
+            }else{
+                widget.onSearch(textEditingController.text);
             }
         });
     }
 
-    void clicked(){
-        if(textEditingController.text.isNotEmpty){
-            widget.onSearch(textEditingController.text);
+    void submitted(String? query){
+        if(query != null && query.isNotEmpty){
+            widget.onSearch(query);
         }
     }
 
@@ -40,19 +42,19 @@ class __SearchState extends State<Search>{
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
 
-        return Padding(padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 2 ),
-          child: DecoratedBox(decoration: BoxDecoration(color: theme.surfaceContainerHigh, borderRadius: BorderRadius.circular(26)),
-            child: Padding(padding: const EdgeInsets.all(2),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
-                children: [
-                    IconButton(onPressed: clear, icon: const Icon(Icons.cancel)),
-                    Expanded(
-                        child: TextFormField( controller: textEditingController, textAlignVertical: TextAlignVertical.center,
-                            decoration: const InputDecoration( border: InputBorder.none, hintText: "Search cities"),),
-                    ),
-                    FilledButton(style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(theme.secondaryFixed)), onPressed: clicked, child: Icon(Icons.search_outlined, color: theme.onSecondaryFixed,),)
-                ],
-              ),
+        return DecoratedBox(decoration: BoxDecoration(color: theme.surfaceContainerHigh, borderRadius: BorderRadius.circular(26)),
+          child: Padding(padding: const EdgeInsets.all(2),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
+              children: [
+                  Expanded(
+                      child: TextFormField( style: const TextStyle(height: 1), maxLines: 1, scrollPadding: EdgeInsets.zero, controller: textEditingController, textAlignVertical: TextAlignVertical.center,
+                          decoration: InputDecoration(
+                              prefixIconColor: theme.onSurface, suffixIconColor: theme.error,
+                              suffixIcon: IconButton(onPressed: clear, icon: const Icon(Icons.cancel)),
+                              prefixIcon: const Icon(Icons.search_outlined,),
+                              border: InputBorder.none, hintText: "Search cities"), onFieldSubmitted: submitted,),
+                  ),
+              ],
             ),
           ),
         );
