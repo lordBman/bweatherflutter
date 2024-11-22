@@ -8,8 +8,6 @@ const Map<String, double> __timeZones = {
     "WAT": 1, "WIB": 7, "WIT": 9, "WITA": 8, "WET": 0, "WEST": 1,
 };
 
-
-
 class JsonParser{
     static int parseInt(dynamic json, String key) {
         return int.parse(json[key].toString());
@@ -21,6 +19,10 @@ class JsonParser{
 
     static String parseString(dynamic json, String key) {
         return json[key].toString();
+    }
+
+    static bool parseBoolean(dynamic json, String key) {
+        return json[key];
     }
 
     static DateTime parseDate(dynamic json, String key) {

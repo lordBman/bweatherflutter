@@ -1,5 +1,6 @@
-import 'package:bweather_open_meteo_api/bweather_open_meteo_api.dart';
-import 'package:bweather_repository/bweather_repository.dart';
+import 'package:bweather_open_meteo_api/bweather_open_meteo_api.dart' as api;
+import 'package:bweather_repository/forecast.dart';
+import 'package:bweather_repository/units.dart';
 
 class ForecastRepository {
     Units __units;

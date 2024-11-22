@@ -58,7 +58,7 @@ class __ForecastStatePageState extends State<ForecastView> {
             return const ErrorView(message: "Encountered an unexpected error when fetching Forecast, check your internet connection");
         }
 
-        Current current = forecastState.result!.current;
+        //Current current = forecastState.result!.current;
         CurrentUnits units = forecastState.result!.current_units;
         WeatherCode weatherCode = WeatherCode.decode(code: current.weather_code, isNight: current.is_day == 0);
 
