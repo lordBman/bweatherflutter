@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,70 +27,4 @@ String formatTime({ required DateTime time, required int timezone }){
     String timezoneFormat = "UTC${timezone >= 0 ? "+" : ""}$timezone";
 
     return "$hourFormat:$minutesFormat$postFormat $timezoneFormat";
-}
-
-class JsonParser{
-    static int parseInt(dynamic json, String key) {
-        return int.parse(json[key].toString());
-    }
-
-    static double parseDouble(dynamic json, String key) {
-        return double.parse(json[key].toString());
-    }
-
-    static String parseString(dynamic json, String key) {
-        return json[key].toString();
-    }
-
-    static DateTime parseDate(dynamic json, String key) {
-        return DateTime.parse(json[key].toString());
-    }
-
-    static List<double> parseDoubleList(dynamic json, String key) {
-        try{
-            if (json[key] is List) {
-                return (json[key] as List).map((objJson) =>  double.parse(objJson.toString())).toList();
-            }
-        }catch(error){
-            log("json parsing error encountered", error: error);
-        }
-        log("json value encountered: $json is not a List");
-        return [];
-    }
-
-    static List<int> parseIntList(dynamic json, String key) {
-        try{
-            if (json[key] is List) {
-                return (json[key] as List).map((objJson) =>  int.parse(objJson.toString())).toList();
-            }
-        }catch(error){
-            log("json parsing error encountered", error: error);
-        }
-        log("json value encountered: $json is not a List");
-        return [];
-    }
-
-    static List<String> parseStringList(dynamic json, String key) {
-        try{
-            if (json[key] is List) {
-                return (json[key] as List).map((objJson) =>  objJson.toString()).toList();
-            }
-        }catch(error){
-            log("json parsing error encountered", error: error);
-        }
-        log("json value encountered: $json is not a List");
-        return [];
-    }
-
-    static List<DateTime> parseDateList(dynamic json, String key) {
-        try{
-            if (json[key] is List) {
-                return (json[key] as List).map((objJson) =>  DateTime.parse(objJson.toString())).toList();
-            }
-        }catch(error){
-            log("json parsing error encountered", error: error);
-        }
-        log("json value encountered: $json is not a List");
-        return [];
-    }
 }

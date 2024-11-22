@@ -16,13 +16,12 @@ const Map<int, String> __dayImages = {
   65: 'meteocons--extreme-day-rain-fill.svg', //'Rain, heavy',
   66: 'meteocons--overcast-rain-fill.svg',   //'Freezing rain, slight',
   67: 'meteocons--extreme-rain-fill.svg',    //'Freezing rain, heavy',
-  71: 'meteocons--snow-fill.svg', //'Snow fall, slight',
   73: 'meteocons--extreme-day-snow-fill.svg',   //'Snow fall, moderate',
   75: 'meteocons--extreme-snow-fill.svg',   //'Snow fall, heavy',
   77: 'meteocons--snow-fill.svg',   //'Snow grains',
   80: 'meteocons--drizzle-fill.svg', //'Rain showers, slight',
   81: 'meteocons--overcast-rain-fill.svg',   //'Rain showers, moderate',
-  82: 'meteocons--extreme-rain-fill.svg',   //'Rain showers, violent',
+  82: 'meteocons--extreme-rain-fill.svg',   //'Rain shower s, violent',
   85: 'meteocons--partly-cloudy-day-snow-fill.svg',       //'Snow showers, slight',
   86: 'meteocons--extreme-snow-fill.svg',  //'Snow showers, heavy',
   95: 'meteocons--thunderstorms-day-fill.svg',   //'Thunderstorm, slight or moderate',
@@ -42,7 +41,6 @@ const Map<int, String> __nightImages = {
   51: 'meteocons--drizzle-fill.svg',     //'Light drizzle',
   53: 'meteocons--partly-cloudy-night-drizzle-fill.svg',   //'Moderate drizzle',
   55: 'meteocons--extreme-night-drizzle-fill.svg', //'Dense drizzle',
-  56: 'meteocons--overcast-drizzle-fill.svg',  //'Freezing drizzle, light',
   57: 'meteocons--extreme-drizzle-fill.svg',   //'Freezing drizzle, dense',
   61: 'meteocons--partly-cloudy-night-rain-fill.svg',  //'Rain, slight',
   63: 'meteocons--overcast-night-rain-fill.svg', // 'Rain, moderate',
@@ -103,8 +101,14 @@ class WeatherCode{
     WeatherCode({ required this.image, required this.description });
 
     factory WeatherCode.decode({ required int code, required bool isNight }){
-        String image = isNight ? "files/icons/${__nightImages[code]}" : "files/icons/${__dayImages[code]}";
+        String image = (isNight ? __nightImages[code] : __dayImages[code]) ?? "";
 
-        return WeatherCode(image: image, description: __descriptions[code]!);
+        return WeatherCode(image: image, description: __descriptions[code] ?? "unknown");
+    }
+}
+
+extension WeatherCodes on int {
+    WeatherCode weatherCode({ bool isNight = false }) {
+        return WeatherCode.decode(code: this, isNight: isNight);
     }
 }

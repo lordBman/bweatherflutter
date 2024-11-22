@@ -45,13 +45,6 @@ class WeatherNotifier extends ChangeNotifier{
     City? __location;
     City? get location => __location;
 
-    final Uno __weatherAPI = Uno(
-        baseURL: "https://api.open-meteo.com/v1/forecast",
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    );
-
     final SettingsNotifier __settingsNotifier;
 
     WeatherNotifier({ required SettingsNotifier settingsNotifier }): __settingsNotifier = settingsNotifier{

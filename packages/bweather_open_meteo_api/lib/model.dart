@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweather_open_meteo_api/util.dart';
 
 class CurrentUnits{
     String time, interval, temperature_2m, relative_humidity_2m, apparent_temperature, is_day, rain, weather_code, pressure_msl;
