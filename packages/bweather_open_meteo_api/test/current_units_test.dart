@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('CurrentUnits', () {
     group('Constructor', () {
-      test('returns an instance Current object with Contructor', () {
+      test('returns an instance Current Units object with Contructor', () {
         expect(CurrentUnits( temperature_2m: "°C", relative_humidity_2m: "%", apparent_temperature: "°C", pressure_msl: "hPa", precipitation: "mm",
             rain: "mm", cloud_cover: "%", surface_pressure: "hPa", wind_speed_10m: "km/h", wind_direction_10m: "°", wind_gusts_10m: "km/h"),
             isA<CurrentUnits>()

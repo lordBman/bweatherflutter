@@ -36,14 +36,14 @@ class CurrentUnits{
 
 class Current{
     DateTime time;
-    int interval, is_day, weather_code, wind_direction_10m,cloud_cover;
+    int is_day, weather_code, wind_direction_10m,cloud_cover;
     double temperature_2m, relative_humidity_2m, apparent_temperature, precipitation, rain, pressure_msl, surface_pressure, wind_speed_10m;
     double wind_gusts_10m;
 
     Current({
         required this.wind_speed_10m, required this.wind_gusts_10m, required this.wind_direction_10m, required this.time,
         required this.weather_code, required this.temperature_2m, required this.surface_pressure, required this.rain,
-        required this.relative_humidity_2m, required this.pressure_msl, required this.is_day, required this.interval,
+        required this.relative_humidity_2m, required this.pressure_msl, required this.is_day,
         required this.apparent_temperature, required this.cloud_cover, required this.precipitation
     });
 
@@ -54,7 +54,7 @@ class Current{
             weather_code: JsonParser.parseInt(json, "weather_code"), temperature_2m: JsonParser.parseDouble(json, "temperature_2m"),
             surface_pressure: JsonParser.parseDouble(json, "surface_pressure"), rain: JsonParser.parseDouble(json, "rain"),
             relative_humidity_2m: JsonParser.parseDouble(json, "relative_humidity_2m"), pressure_msl: JsonParser.parseDouble(json, "pressure_msl"),
-            is_day: JsonParser.parseInt(json, "is_day"), interval: JsonParser.parseInt(json, "interval"), apparent_temperature: JsonParser.parseDouble(json, "apparent_temperature"),
+            is_day: JsonParser.parseInt(json, "is_day"), apparent_temperature: JsonParser.parseDouble(json, "apparent_temperature"),
             cloud_cover: JsonParser.parseInt(json, "cloud_cover"), precipitation: JsonParser.parseDouble(json, "precipitation")
         );
     }
@@ -63,7 +63,7 @@ class Current{
         "wind_speed_10m": wind_speed_10m, "wind_gusts_10m": wind_gusts_10m, "wind_direction_10m": wind_direction_10m,
         "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m, "surface_pressure": surface_pressure,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "pressure_msl": pressure_msl, "is_day": is_day,
-        "interval": interval, "apparent_temperature": apparent_temperature, "precipitation": precipitation, "cloud_cover": cloud_cover
+        "apparent_temperature": apparent_temperature, "precipitation": precipitation, "cloud_cover": cloud_cover
     };
 
     String serialize() => jsonEncode(toJson());
