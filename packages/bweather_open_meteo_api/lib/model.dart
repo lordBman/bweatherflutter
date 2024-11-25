@@ -24,7 +24,7 @@ class CurrentUnits{
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "apparent_temperature" : apparent_temperature, "surface_pressure": surface_pressure,
         "pressure_msl": pressure_msl, "rain": rain, "relative_humidity_2m": relative_humidity_2m, "temperature_2m": temperature_2m,
         "wind_direction_10m": wind_direction_10m, "wind_gusts_10m": wind_gusts_10m,
@@ -59,7 +59,7 @@ class Current{
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "wind_speed_10m": wind_speed_10m, "wind_gusts_10m": wind_gusts_10m, "wind_direction_10m": wind_direction_10m,
         "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m, "surface_pressure": surface_pressure,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "pressure_msl": pressure_msl, "is_day": is_day,
@@ -88,7 +88,7 @@ class HourlyUnits {
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "apparent_temperature": apparent_temperature,
         "precipitation_probability": precipitation_probability, "dew_point_2m": dew_point_2m,
@@ -117,7 +117,7 @@ class Hourly{
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "apparent_temperature": apparent_temperature,
         "precipitation_probability": precipitation_probability, "dew_point_2m": dew_point_2m,
@@ -147,7 +147,7 @@ class DailyUnits{
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "time": time, "weather_code": weather_code, "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
         "sunset": sunset, "sunrise": sunrise, "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
         "precipitation_sum": precipitation_sum, "rain_sum": rain_sum, "wind_gusts_10m_max": wind_gusts_10m_max, "wind_speed_10m_max": wind_speed_10m_max
@@ -179,7 +179,7 @@ class Daily{
         );
     }
 
-    Map toJson() => {
+    Map<String, dynamic> toJson() => {
         "time": time, "weather_code": weather_code, "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
         "sunset": sunset, "sunrise": sunrise, "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
         "precipitation_sum": precipitation_sum, "rain_sum": rain_sum, "wind_gusts_10m_max": wind_gusts_10m_max, "wind_speed_10m_max": wind_speed_10m_max

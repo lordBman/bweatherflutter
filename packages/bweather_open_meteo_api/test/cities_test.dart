@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
     group('City', () {
         group('Constructor', () {
-            test('returns an instance City object', () {
+            test('returns an instance City object from Contructor', () {
                 expect(const City(name: 'Chicago', elevation: 2.4, country: "America", latitude: 41.85003, longitude: -87.65005),
                     isA<City>().having((w) => w.name, 'name', 'Chicago')
                         .having((w) => w.country, 'country', 'America')
@@ -16,7 +16,7 @@ void main() {
             });
         });
         group('fromJson', () {
-            test('returns correct City object', () {
+            test('returns correct City object from json map', () {
                 expect(City.fromJson(<String, dynamic>{ 'name': 'Chicago', "elevation": 2.4, "country": "America", 'latitude': 41.85003, 'longitude': -87.65005 }),
                     isA<City>()
                         .having((w) => w.name, 'name', 'Chicago')
@@ -25,7 +25,7 @@ void main() {
                         .having((w) => w.latitude, 'latitude', 41.85003)
                         .having((w) => w.longitude, 'longitude', -87.65005));
             });
-            test('returns correct City object', () {
+            test('returns correct City object from json String', () {
                 expect(City.fromJson(jsonDecode('{ "name": "Chicago", "elevation": 2.4, "country": "America", "latitude": 41.85003, "longitude": -87.65005 }')),
                     isA<City>()
                         .having((w) => w.name, 'name', 'Chicago')
