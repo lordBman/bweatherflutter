@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:bweather_open_meteo_api/cities.dart';
@@ -14,7 +13,7 @@ class LocationNotFoundFailure implements Exception {}
 /// Exception thrown when getWeather fails.
 class WeatherRequestFailure implements Exception {}
 
-/// Exception thrown when weather for provided location is not found.
+/// Exception thrown when weather for provided location is not found.z
 class WeatherNotFoundFailure implements Exception {}
 
 final Uno __weatherAPI = Uno(
