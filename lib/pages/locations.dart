@@ -1,10 +1,11 @@
 import 'package:bweatherflutter/components/location.dart';
-import 'package:bweatherflutter/providers/main.dart';
-import 'package:bweatherflutter/providers/weather.dart';
+import 'package:bweatherflutter/states/forecast/weather_state.dart';
+import 'package:bweatherflutter/states/main_cubit.dart';
+import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:liquid_pull_refresh/liquid_pull_refresh.dart';
-import 'package:provider/provider.dart';
 
 class Locations extends StatefulWidget {
     final GlobalKey<LiquidPullRefreshState> refreshIndicatorKey = GlobalKey<LiquidPullRefreshState>();
@@ -17,7 +18,7 @@ class Locations extends StatefulWidget {
 
 class __LocationsState extends State<Locations>{
     late ScrollController __scrollController;
-    late MainProvider __mainProvider;
+    late MainCubit __mainCubit;
 
     @override
     void initState() {
@@ -29,10 +30,10 @@ class __LocationsState extends State<Locations>{
     void onScroll(){
         switch(__scrollController.position.userScrollDirection){
             case ScrollDirection.forward:
-                __mainProvider.showFAO = true;
+                __mainCubit.showFAO = true;
                 break;
             case ScrollDirection.reverse:
-                __mainProvider.showFAO = false;
+                __mainCubit.showFAO = false;
                 break;
             case ScrollDirection.idle:
                 break;
@@ -42,8 +43,8 @@ class __LocationsState extends State<Locations>{
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
-        WeatherNotifier weatherNotifier = context.watch<WeatherNotifier>();
-        __mainProvider = context.watch<MainProvider>();
+        WeatherCubit weatherCubit = context.read<WeatherCubit>();
+        __mainCubit = context.read<MainCubit>();
 
         return CustomScrollView(//controller: __scrollController,
             slivers: [
@@ -54,7 +55,7 @@ class __LocationsState extends State<Locations>{
                   title: Text("Cities", style: TextStyle(color: theme.onSurface, fontSize: 20),)),
               SliverFillRemaining(child: LiquidPullRefresh(
                   onRefresh: () async{
-                      await weatherNotifier.reload(force: true);
+                      await weatherCubit.reload(force: true);
                   },
                   showChildOpacityTransition: false,
                   backgroundColor: theme.surface,
@@ -65,16 +66,20 @@ class __LocationsState extends State<Locations>{
                   showDroplet: true,
                   springAnimationDurationInMilliseconds: 400,
                   key: widget.refreshIndicatorKey,
-                  child: ListView.separated(
-                      controller: __scrollController,
-                      padding: const EdgeInsets.only(bottom: 12),
-                      itemCount: weatherNotifier.savedCities.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 15),
-                      itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: LocationItem(index: index),
-                      ),
-                      //separatorBuilder: (context, index) => const SizedBox(height: 15,),
+                  child: BlocBuilder<WeatherCubit, WeatherState>(
+                      builder: (context, state) {
+                          return ListView.separated(
+                              controller: __scrollController,
+                              padding: const EdgeInsets.only(bottom: 12),
+                              itemCount: state.cities.length,
+                              separatorBuilder: (context, index) => const SizedBox(height: 15),
+                              itemBuilder: (context, index) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                  child: LocationItem(index: index),
+                              ),
+                              //separatorBuilder: (context, index) => const SizedBox(height: 15,),
+                          );
+                      }
                   ))),
               /*SliverList.s(
                   itemCount: weatherNotifier.savedCities.length,

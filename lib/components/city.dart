@@ -1,43 +1,36 @@
-import 'package:bweatherflutter/providers/cites.dart';
-import 'package:bweatherflutter/providers/weather.dart';
+import 'package:bweather_repository/bweather_repository.dart';
+import 'package:bweatherflutter/states/cities_cubit.dart';
+import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/cities.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CityViewItem extends StatefulWidget{
-    final City city;
+class CityViewItem extends StatelessWidget{
+    final CityData city;
 
     const CityViewItem({super.key,  required this.city });
 
-    @override
-    State<CityViewItem> createState() => __CityViewItemState();
-}
-
-class __CityViewItemState extends State<CityViewItem> {
-    late WeatherNotifier weatherNotifier;
-
     void choose(BuildContext context){
-        weatherNotifier.addCity(widget.city);
+        context.read<WeatherCubit>().requestCity(city.name);
         Navigator.pop(context);
     }
 
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
-        weatherNotifier = context.watch<WeatherNotifier>();
 
         return IconButton(onPressed: ()=> choose(context), style: const ButtonStyle(overlayColor: WidgetStatePropertyAll(Colors.transparent), padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 0, vertical: 10))),
             icon: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Icon(Icons.location_pin, size: 30, color: theme.primary,),
                 const SizedBox(width: 8),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                    Text(widget.city.name, style: TextStyle(fontSize: 18, letterSpacing: 1.4, height: 1, fontWeight: FontWeight.w300, color: theme.primary),),
+                    Text(city.name, style: TextStyle(fontSize: 18, letterSpacing: 1.4, height: 1, fontWeight: FontWeight.w300, color: theme.primary),),
                     const SizedBox(height: 4,),
-                    Text(widget.city.country, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: theme.onSurface.withOpacity(0.8)),),
+                    Text(city.country, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: theme.onSurface.withOpacity(0.8)),),
                     Row(children: [
-                        Text("Latitude: ${widget.city.latitude.ceil()}", style: const TextStyle(fontSize: 14 ),),
+                        Text("Latitude: ${city.latitude.ceil()}", style: const TextStyle(fontSize: 14 ),),
                         const SizedBox(width: 10,),
-                        Text("Longitude: ${widget.city.longitude.ceil()}", style: const TextStyle(fontSize: 14 )),
+                        Text("Longitude: ${city.longitude.ceil()}", style: const TextStyle(fontSize: 14 )),
                       ],),
                 ],),
             ]),
@@ -47,7 +40,7 @@ class __CityViewItemState extends State<CityViewItem> {
 
 class CityView extends StatelessWidget{
     final String? letter;
-    final City city;
+    final CityData city;
 
     const CityView({super.key, required this.city, this.letter });
 
@@ -65,25 +58,52 @@ class CityView extends StatelessWidget{
     }
 }
 
-class CityList extends StatefulWidget{
+class CityList extends StatelessWidget{
     const CityList({super.key});
 
     @override
-    State<StatefulWidget> createState() => __CityListState();
+    Widget build(BuildContext context) {
+        return BlocBuilder<CitiesCubit, CitiesState>(
+            builder: (context, state) => ListView.separated(itemCount: cities.length, itemBuilder: (context, index){
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: CityView(city: cities[index], letter: state.letters[index],),
+              );
+          }, separatorBuilder: (context, index) => const Divider(height: 0.2),),
+        );
+    }
 }
 
-class __CityListState extends State<CityList>{
-    late CitiesNotifier citiesNotifier;
+
+class CityViewResultItem extends StatelessWidget{
+    final City city;
+
+    const CityViewResultItem({super.key,  required this.city });
+
+    void choose(BuildContext context){
+        context.read<WeatherCubit>().addCity(city);
+        Navigator.pop(context);
+    }
 
     @override
     Widget build(BuildContext context) {
-        citiesNotifier = context.watch<CitiesNotifier>();
+        final ColorScheme theme = Theme.of(context).colorScheme;
 
-        return ListView.separated(itemCount: cities.length, itemBuilder: (context, index){
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: CityView(city: cities[index], letter: citiesNotifier.letters[index],),
-            );
-        }, separatorBuilder: (context, index) => const Divider(height: 0.3,),);
+        return IconButton(onPressed: ()=> choose(context), style: const ButtonStyle(overlayColor: WidgetStatePropertyAll(Colors.transparent), padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 0, vertical: 10))),
+            icon: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Icon(Icons.location_pin, size: 30, color: theme.primary,),
+                const SizedBox(width: 8),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                    Text(city.name, style: TextStyle(fontSize: 18, letterSpacing: 1.4, height: 1, fontWeight: FontWeight.w300, color: theme.primary),),
+                    const SizedBox(height: 4,),
+                    Text(city.country, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: theme.onSurface.withOpacity(0.8)),),
+                    Row(children: [
+                        Text("Latitude: ${city.latitude.ceil()}", style: const TextStyle(fontSize: 14 ),),
+                        const SizedBox(width: 10,),
+                        Text("Longitude: ${city.longitude.ceil()}", style: const TextStyle(fontSize: 14 )),
+                      ],),
+                ],),
+            ]),
+        );
     }
 }

@@ -37,7 +37,7 @@ class WeatherClient{
             Map<String, String> params = {
                 "latitude" : city.latitude.toString(),
                 "longitude": city.longitude.toString(),
-                "elavation": city.elavation.toString(),
+                "elevation": city.elevation.toString(),
                 "temperature_unit": tempUnit,
                 "wind_speed_unit": windSpeedUnit,
                 "precipitation_unit": precipitationUnit,
@@ -62,7 +62,7 @@ class WeatherClient{
     /// Finds a [City] `/v1/search/?name=(query)`.
     static Future<List<City>> locationSearch(String query) async {
         try{
-            final locationJson = jsonDecode((await __locationAPI.get("/", params: {'name': query, 'count': '1'})).data) as Map;
+            final locationJson = (await __locationAPI.get("/", params: {'name': query })).data;
 
             if (!locationJson.containsKey('results') && (locationJson['results'] as List).isEmpty){
                 throw LocationNotFoundFailure();
@@ -75,6 +75,7 @@ class WeatherClient{
                     throw LocationNotFoundFailure();
                 }
             }
+            log("location query error:", error: error);
             throw LocationRequestFailure();
         }
     }

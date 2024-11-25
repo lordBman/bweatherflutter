@@ -1,8 +1,4 @@
-import 'package:bweatherflutter/components/daily.dart';
-import 'package:bweatherflutter/components/hourly.dart';
-import 'package:bweatherflutter/components/option-button.dart';
 import 'package:bweatherflutter/components/shimmering/shimmer_wraper.dart';
-import 'package:bweatherflutter/utils/result.dart';
 import 'package:flutter/material.dart';
 
 class OthersShimmering extends StatelessWidget{

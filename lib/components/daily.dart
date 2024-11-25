@@ -1,36 +1,29 @@
-import 'package:bweatherflutter/providers/settings.dart';
-import 'package:bweatherflutter/utils/result.dart';
+import 'package:bweather_repository/bweather_repository.dart';
 import 'package:bweatherflutter/utils/utils.dart';
-import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 class DailyView extends StatefulWidget{
     final Daily daily;
-    final DailyUnits units;
-    final int index;
 
-    const DailyView({super.key,  required this.daily, required this.units,  required this.index });
+    const DailyView({super.key,  required this.daily });
 
     @override
     State<DailyView> createState() => _DailyViewState();
 }
 
 class _DailyViewState extends State<DailyView> {
-    late SettingsNotifier settingsNotifier;
 
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
-        settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
 
-        int weatherCode = widget.daily.weather_code[widget.index];
-        DateTime time = widget.daily.time[widget.index];
-        String tempUnit = widget.units.apparent_temperature_max;
+        int weatherCode = widget.daily.weather_code;
+        DateTime time = widget.daily.time;
+        String tempUnit = widget.daily.apparent_temperature_max.unit;
 
-        int min = widget.daily.temperature_2m_min[widget.index].ceil();
-        int max = widget.daily.temperature_2m_max[widget.index].ceil();
+        int min = widget.daily.temperature_min.value.ceil();
+        int max = widget.daily.temperature_max.value.ceil();
 
         return Column(
             mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center,

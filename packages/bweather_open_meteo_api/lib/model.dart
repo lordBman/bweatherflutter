@@ -3,31 +3,31 @@ import 'dart:convert';
 import 'package:bweather_open_meteo_api/util.dart';
 
 class CurrentUnits{
-    String time, interval, temperature_2m, relative_humidity_2m, apparent_temperature, is_day, rain, weather_code, pressure_msl;
+    String temperature_2m, relative_humidity_2m, apparent_temperature, rain, pressure_msl;
     String surface_pressure, wind_speed_10m, wind_direction_10m, wind_gusts_10m, precipitation, cloud_cover;
 
     CurrentUnits({
-        required this.apparent_temperature, required this.interval, required this.is_day, required this.pressure_msl,
+        required this.apparent_temperature, required this.pressure_msl,
         required this.rain, required this.relative_humidity_2m, required this.surface_pressure, required this.temperature_2m,
-        required this.time, required this.weather_code, required this.wind_direction_10m, required this.wind_gusts_10m,
+        required this.wind_direction_10m, required this.wind_gusts_10m,
         required this.wind_speed_10m, required this.cloud_cover, required this.precipitation
     });
 
     factory CurrentUnits.fromJson(dynamic json) {
         return CurrentUnits(
-            apparent_temperature: json["apparent_temperature"].toString(), interval: json["interval"].toString(),
-            is_day: json["is_day"] ?? "", pressure_msl: json["pressure_msl"].toString(), rain: json["rain"].toString(),
+            apparent_temperature: json["apparent_temperature"].toString(),
+            pressure_msl: json["pressure_msl"].toString(), rain: json["rain"].toString(),
             relative_humidity_2m: json["relative_humidity_2m"].toString(), surface_pressure: json["surface_pressure"].toString(),
-            temperature_2m: json["temperature_2m"].toString(), time: json["time"].toString(), weather_code: json["weather_code"].toString(),
+            temperature_2m: json["temperature_2m"].toString(),
             wind_direction_10m: json["wind_direction_10m"].toString(), wind_gusts_10m: json["wind_gusts_10m"].toString(),
             wind_speed_10m: json["wind_speed_10m"].toString(), precipitation: json["precipitation"], cloud_cover: json["cloud_cover"]
         );
     }
 
     Map toJson() => {
-        "apparent_temperature" : apparent_temperature, "interval" : interval, "is_day": is_day, "surface_pressure": surface_pressure,
+        "apparent_temperature" : apparent_temperature, "surface_pressure": surface_pressure,
         "pressure_msl": pressure_msl, "rain": rain, "relative_humidity_2m": relative_humidity_2m, "temperature_2m": temperature_2m,
-        "time": time, "weather_code": weather_code, "wind_direction_10m": wind_direction_10m, "wind_gusts_10m": wind_gusts_10m,
+        "wind_direction_10m": wind_direction_10m, "wind_gusts_10m": wind_gusts_10m,
         "wind_speed_10m": wind_speed_10m, "precipitation": precipitation, "cloud_cover": cloud_cover
     };
 

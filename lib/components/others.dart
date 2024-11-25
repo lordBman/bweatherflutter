@@ -1,15 +1,13 @@
+import 'package:bweather_repository/bweather_repository.dart';
 import 'package:bweatherflutter/components/daily.dart';
 import 'package:bweatherflutter/components/hourly.dart';
 import 'package:bweatherflutter/components/option-button.dart';
-import 'package:bweatherflutter/utils/cities.dart';
-import 'package:bweatherflutter/utils/result.dart';
 import 'package:flutter/material.dart';
 
 class Others extends StatefulWidget{
-    final Result result;
     final City city;
 
-    const Others({super.key, required this.result, required this.city });
+    const Others({super.key, required this.city });
 
     @override
     State<StatefulWidget> createState() => __OthersState();
@@ -21,15 +19,13 @@ class __OthersState extends State<Others>{
 
     choose(String choice) => setState(()=>active = choice );
 
-    List<Widget> init(){
-        Daily daily = widget.result.daily;
-        final DailyUnits dailyUnits = widget.result.daily_units;
-        final Hourly hourly = widget.result.hourly;
-        final HourlyUnits hourlyUnits = widget.result.hourly_units;
-        final length = active == "hourly" ? hourly.time.length : daily.time.length;
+    List<Widget> init(Forecast forecast){
+        List<Daily> daily = forecast.daily;
+        final List<Hourly> hourly = forecast.hourly;
+        final length = active == "hourly" ? hourly.length : daily.length;
 
         return List.generate(length, (index){
-            var child = active == "hourly" ? HourlyView(city: widget.city, hourly: hourly, units: hourlyUnits, currentTime: widget.result.current.time, index: index) : DailyView(daily: daily, units: dailyUnits, index: index);
+            var child = active == "hourly" ? HourlyView(hourly: hourly[index]) : DailyView(daily: daily[index]);
             return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DecoratedBox( decoration: BoxDecoration(color: theme.surfaceContainerHigh,
@@ -50,7 +46,7 @@ class __OthersState extends State<Others>{
             children: [
                 Option(onChoose: choose),
                 const SizedBox(height: 12,),
-                SizedBox(height: 180, child: ListView(scrollDirection: Axis.horizontal, children: init()))
+                SizedBox(height: 180, child: ListView(scrollDirection: Axis.horizontal, children: init(widget.city.forecast!)))
             ],
         );
     }

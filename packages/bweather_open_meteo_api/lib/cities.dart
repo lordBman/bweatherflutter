@@ -5,15 +5,15 @@ import 'package:bweather_open_meteo_api/util.dart';
 class City{
     final String name, country;
     final String timezone;
-    final double elavation, latitude, longitude;
+    final double elevation, latitude, longitude;
 
-    const City({ required this.name, required this.elavation, this.timezone = "auto", required this.country, required this.latitude, required this.longitude });
+    const City({ required this.name, required this.elevation, this.timezone = "auto", required this.country, required this.latitude, required this.longitude });
 
     factory City.fromJson(dynamic json) {
-        return City(name: json["name"].toString(), timezone: json["timezone"].toString(), country: json["country"].toString(), latitude: JsonParser.parseDouble(json, "latitude"), longitude: JsonParser.parseDouble(json, "longitude"), elavation: JsonParser.parseDouble(json, "elavation"));
+        return City(name: json["name"].toString(), timezone: json["timezone"].toString(), country: json["country"].toString(), latitude: JsonParser.parseDouble(json, "latitude"), longitude: JsonParser.parseDouble(json, "longitude"), elevation: JsonParser.parseDouble(json, "elevation"));
     }
 
-    Map toJson() => { "name" : name, "timezone": timezone, "elavation": elavation, "country" : country, "latitude": latitude, "longitude": longitude };
+    Map<String, dynamic> toJson() => { "name" : name, "timezone": timezone, "elevation": elevation, "country" : country, "latitude": latitude, "longitude": longitude };
 
     String serialize() => jsonEncode(toJson());
 

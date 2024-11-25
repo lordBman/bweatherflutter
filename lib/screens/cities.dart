@@ -1,9 +1,8 @@
 import 'package:bweatherflutter/components/city.dart';
 import 'package:bweatherflutter/components/search.dart';
-import 'package:bweatherflutter/providers/cites.dart';
-import 'package:bweatherflutter/utils/cities.dart';
+import 'package:bweatherflutter/states/cities_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CitiesScreen extends StatefulWidget{
     static const String routeName = "cities";
@@ -15,17 +14,16 @@ class CitiesScreen extends StatefulWidget{
 }
 
 class __CitiesScreenState extends State<CitiesScreen>{
-    late CitiesNotifier citiesNotifier;
-    List<City> results = [];
+    late CitiesCubit citiesCubit;
     int index = 0;
 
     void search(String query){
-      citiesNotifier.search(query).then((value) {
+      citiesCubit.search(query);
+      if(query.isNotEmpty && index == 0){
           setState(() {
-              results = value;
               index = 1;
           });
-      });
+      }
     }
 
     void cleared(){
@@ -34,9 +32,7 @@ class __CitiesScreenState extends State<CitiesScreen>{
 
     @override
     Widget build(BuildContext context) {
-        citiesNotifier = context.watch<CitiesNotifier>();
-        final ColorScheme theme = Theme.of(context).colorScheme;
-
+        citiesCubit = context.read<CitiesCubit>();
         return Scaffold(
             body: CustomScrollView(
                 slivers: [
@@ -46,13 +42,15 @@ class __CitiesScreenState extends State<CitiesScreen>{
                             title: Search(onSearch: search, cleared: cleared),),),
                     SliverFillRemaining(child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal:  10.0),
-                      child: IndexedStack(index: index , children: [
-                          const CityList(),
-                          ListView.separated(
-                              itemCount: results.length, itemBuilder: (context, index)=> CityViewItem(city: results[index]),
-                              separatorBuilder: (context, index) => const Divider(height: 0.3),
-                          )
-                      ],),
+                      child: BlocBuilder<CitiesCubit, CitiesState>(
+                          builder: (context, state) => IndexedStack(index: index , children: [
+                            const CityList(),
+                            ListView.separated(
+                                itemCount: state.searchResults.length, itemBuilder: (context, index)=> CityViewResultItem(city: state.searchResults[index]),
+                                separatorBuilder: (context, index) => const Divider(height: 0.3),
+                            )
+                        ],),
+                      ),
                     ),)
                 ],
             ),);

@@ -12,7 +12,7 @@ class Value<T>{
 
     factory Value.fromJson(dynamic json) => Value<T>(value: json["value"], unit: json["unit"]);
 
-    Map toJson() => { "value": value, "unit": unit }
+    Map toJson() => { "value": value, "unit": unit };
     String serialize() => jsonEncode(toJson());
 }
 
@@ -113,25 +113,19 @@ class Daily{
 }
 
 class Forecast extends Equatable{
-    double latitude, longitude, elevation;
-    int utc_offset_seconds;
-    String timezone, timezone_abbreviation;
+    final int utc_offset_seconds;
 
-    Current current;
-    List<Hourly> hourly;
-    List<Daily> daily;
+    final Current current;
+    final List<Hourly> hourly;
+    final List<Daily> daily;
 
-    Forecast({
-        required this.latitude, required this.longitude, required this.elevation,
-        required this.timezone, required this.timezone_abbreviation, required this.utc_offset_seconds,
+    const Forecast({
+        required this.utc_offset_seconds,
         required this.current, required this.hourly, required this.daily,
     });
 
     factory Forecast.fromJson(dynamic json) {
         return Forecast(
-            latitude: JsonParser.parseDouble(json, "latitude"), longitude: JsonParser.parseDouble(json, "longitude"),
-            elevation: JsonParser.parseDouble(json, "elevation"), timezone: JsonParser.parseString(json, "timezone"),
-            timezone_abbreviation: JsonParser.parseString(json, "timezone_abbreviation"),
             utc_offset_seconds: JsonParser.parseInt(json, "utc_offset_seconds"),
             current: Current.fromJson(json["current"]),
             hourly: (json["hourly"] as List).map((element)=> Hourly.fromJson(element)).toList(),
@@ -140,8 +134,7 @@ class Forecast extends Equatable{
     }
 
     Map<String, dynamic> toJson() => {
-        "latitude": latitude, "longitude": longitude, "elevation": elevation,
-        "timezone": timezone, "timezone_abbreviation": timezone_abbreviation, "utc_offset_seconds": utc_offset_seconds,
+        "utc_offset_seconds": utc_offset_seconds,
         "current": current.toJson(),
         "hourly": hourly.map((element)=> element.toJson()).toList(),
         "daily": daily.map((element) => element.toJson()).toList()
