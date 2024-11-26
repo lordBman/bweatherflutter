@@ -52,7 +52,7 @@ void main() {
                 .having((c) => c.temperature_2m, 'Temperature', 12.1));
       });
       test('returns correct Current object from json String', () {
-        expect(CurrentUnits.fromJson(jsonDecode('''{
+        expect(Current.fromJson(jsonDecode('''{
           "time": "2024-11-25T12:30", "temperature_2m": 12.1, "relative_humidity_2m": 65, "apparent_temperature": 9.2, "is_day": 1,
             "precipitation": 0, "rain": 0, "weather_code": 3, "cloud_cover": 100, "pressure_msl": 1008.9, "surface_pressure": 1004.3, "wind_speed_10m": 12.8,
             "wind_direction_10m": 158, "wind_gusts_10m": 29.5
@@ -80,7 +80,7 @@ void main() {
             precipitation: 0, rain: 0, weather_code: 3, cloud_cover: 100, pressure_msl: 1008.9, surface_pressure: 1004.3, wind_speed_10m: 12.8,
             wind_direction_10m: 158, wind_gusts_10m: 29.5).toJson(),
             isA<Map<String, dynamic>>()
-                .having((c) => c is DateTime, 'instance of DateTime', true)
+                .having((c) => c["time"] is String, 'instance of String', true)
                 .having((c) => c["is_day"], 'Is Day ?', 1)
                 .having((c) => c["weather_code"], 'Weather Code', 3)
                 .having((c) => c["precipitation"], 'precipitation', 0)

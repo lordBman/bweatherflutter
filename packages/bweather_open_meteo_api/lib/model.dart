@@ -61,7 +61,7 @@ class Current{
 
     Map<String, dynamic> toJson() => {
         "wind_speed_10m": wind_speed_10m, "wind_gusts_10m": wind_gusts_10m, "wind_direction_10m": wind_direction_10m,
-        "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m, "surface_pressure": surface_pressure,
+        "time": time.toString(), "weather_code": weather_code, "temperature_2m": temperature_2m, "surface_pressure": surface_pressure,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "pressure_msl": pressure_msl, "is_day": is_day,
         "apparent_temperature": apparent_temperature, "precipitation": precipitation, "cloud_cover": cloud_cover
     };
@@ -70,26 +70,25 @@ class Current{
 }
 
 class HourlyUnits {
-    String time, temperature_2m, relative_humidity_2m, dew_point_2m, apparent_temperature;
-    String precipitation_probability, rain, weather_code;
+    String temperature_2m, relative_humidity_2m, dew_point_2m, apparent_temperature;
+    String precipitation_probability, rain;
 
     HourlyUnits({
         required this.apparent_temperature, required this.relative_humidity_2m, required this.rain,
-        required this.temperature_2m, required this.weather_code, required this.precipitation_probability,
-        required this.dew_point_2m, required this.time
+        required this.temperature_2m, required this.precipitation_probability,
+        required this.dew_point_2m
     });
 
     factory HourlyUnits.fromJson(dynamic json) {
         return HourlyUnits(
             apparent_temperature: JsonParser.parseString(json, "apparent_temperature"), relative_humidity_2m: JsonParser.parseString(json, "relative_humidity_2m"),
-            rain: JsonParser.parseString(json, "rain"), temperature_2m: JsonParser.parseString(json, "temperature_2m"), weather_code: JsonParser.parseString(json, "weather_code"),
-            precipitation_probability: JsonParser.parseString(json, "precipitation_probability"), dew_point_2m: JsonParser.parseString(json, "dew_point_2m"),
-            time: JsonParser.parseString(json, "time")
+            rain: JsonParser.parseString(json, "rain"), temperature_2m: JsonParser.parseString(json, "temperature_2m"),
+            precipitation_probability: JsonParser.parseString(json, "precipitation_probability"), dew_point_2m: JsonParser.parseString(json, "dew_point_2m")
         );
     }
 
     Map<String, dynamic> toJson() => {
-        "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m,
+        "temperature_2m": temperature_2m,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "apparent_temperature": apparent_temperature,
         "precipitation_probability": precipitation_probability, "dew_point_2m": dew_point_2m,
     };
@@ -118,7 +117,7 @@ class Hourly{
     }
 
     Map<String, dynamic> toJson() => {
-        "time": time, "weather_code": weather_code, "temperature_2m": temperature_2m,
+        "time": time.map((element)=> element.toString()).toList(), "weather_code": weather_code, "temperature_2m": temperature_2m,
         "rain": rain, "relative_humidity_2m": relative_humidity_2m, "apparent_temperature": apparent_temperature,
         "precipitation_probability": precipitation_probability, "dew_point_2m": dew_point_2m,
     };
@@ -127,29 +126,28 @@ class Hourly{
 }
 
 class DailyUnits{
-    String time, weather_code, temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
-    String sunrise, sunset, precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
+    String temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
+    String precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
 
     DailyUnits({
-        required this.weather_code, required this.time, required this.apparent_temperature_max, required this.sunrise,
+        required this.apparent_temperature_max,
         required this.apparent_temperature_min, required this.precipitation_sum, required this.temperature_2m_max,
-        required this.rain_sum, required this.sunset, required this.temperature_2m_min, required this.wind_gusts_10m_max,
+        required this.rain_sum, required this.temperature_2m_min, required this.wind_gusts_10m_max,
         required this.wind_speed_10m_max
     });
 
     factory DailyUnits.fromJson(dynamic json) {
         return DailyUnits(
             apparent_temperature_min: JsonParser.parseString(json, "apparent_temperature_min"), apparent_temperature_max: JsonParser.parseString(json, "apparent_temperature_max"),
-            sunrise: JsonParser.parseString(json, "sunrise"), sunset: JsonParser.parseString(json, "sunset"), weather_code: JsonParser.parseString(json, "weather_code"),
             temperature_2m_min: JsonParser.parseString(json, "temperature_2m_min"), temperature_2m_max: JsonParser.parseString(json, "temperature_2m_max"),
-            time: JsonParser.parseString(json, "time"), precipitation_sum: JsonParser.parseString(json, "precipitation_sum"), rain_sum: JsonParser.parseString(json, "rain_sum"),
+            precipitation_sum: JsonParser.parseString(json, "precipitation_sum"), rain_sum: JsonParser.parseString(json, "rain_sum"),
             wind_gusts_10m_max: JsonParser.parseString(json, "wind_gusts_10m_max"), wind_speed_10m_max: JsonParser.parseString(json, "wind_speed_10m_max")
         );
     }
 
     Map<String, dynamic> toJson() => {
-        "time": time, "weather_code": weather_code, "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
-        "sunset": sunset, "sunrise": sunrise, "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
+        "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
+        "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
         "precipitation_sum": precipitation_sum, "rain_sum": rain_sum, "wind_gusts_10m_max": wind_gusts_10m_max, "wind_speed_10m_max": wind_speed_10m_max
     };
 
@@ -157,7 +155,7 @@ class DailyUnits{
 }
 
 class Daily{
-    List<DateTime>time, sunrise, sunset;
+    List<DateTime> time, sunrise, sunset;
     List<int> weather_code;
     List<double> temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
     List<double> precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
@@ -180,8 +178,8 @@ class Daily{
     }
 
     Map<String, dynamic> toJson() => {
-        "time": time, "weather_code": weather_code, "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
-        "sunset": sunset, "sunrise": sunrise, "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
+        "time": time.map((element)=> element.toString()).toList(), "weather_code": weather_code, "apparent_temperature_min": apparent_temperature_min, "apparent_temperature_max": apparent_temperature_max,
+        "sunset": sunset.map((element)=> element.toString()).toList(), "sunrise": sunrise.map((element)=> element.toString()).toList(), "temperature_2m_min": temperature_2m_min, "temperature_2m_max": temperature_2m_max,
         "precipitation_sum": precipitation_sum, "rain_sum": rain_sum, "wind_gusts_10m_max": wind_gusts_10m_max, "wind_speed_10m_max": wind_speed_10m_max
     };
 
