@@ -7,6 +7,7 @@ import 'package:bweatherflutter/states/main_cubit.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';
 import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';

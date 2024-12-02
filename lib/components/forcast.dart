@@ -11,6 +11,7 @@ import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';
 import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,11 +51,11 @@ class __cityStatePageState extends State<ForecastView> {
         return BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state){
             CityState cityState = state.cities[widget.index];
 
-            if(cityState.status.isLoading && cityState.city.forecast != null){
+            if(cityState.status.isLoading && cityState.city.forecast == null){
                 return const ForecastShimmering();
             }
 
-            if (cityState.status.isFailure){
+            if (cityState.status.isFailure || cityState.city.forecast == null){
                 return const ErrorView(message: "Encountered an unexpected error when fetching Forecast, check your internet connection");
             }
 

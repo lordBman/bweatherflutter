@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:bweather_open_meteo_api/util.dart';
+import 'package:equatable/equatable.dart';
 
-class CurrentUnits{
-    String temperature_2m, relative_humidity_2m, apparent_temperature, rain, pressure_msl;
-    String surface_pressure, wind_speed_10m, wind_direction_10m, wind_gusts_10m, precipitation, cloud_cover;
+class CurrentUnits extends Equatable{
+    final String temperature_2m, relative_humidity_2m, apparent_temperature, rain, pressure_msl;
+    final String surface_pressure, wind_speed_10m, wind_direction_10m, wind_gusts_10m, precipitation, cloud_cover;
 
-    CurrentUnits({
+    const CurrentUnits({
         required this.apparent_temperature, required this.pressure_msl,
         required this.rain, required this.relative_humidity_2m, required this.surface_pressure, required this.temperature_2m,
         required this.wind_direction_10m, required this.wind_gusts_10m,
@@ -32,15 +33,21 @@ class CurrentUnits{
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        temperature_2m, relative_humidity_2m, apparent_temperature, rain, pressure_msl,
+        surface_pressure, wind_speed_10m, wind_direction_10m, wind_gusts_10m, precipitation, cloud_cover
+    ];
 }
 
-class Current{
-    DateTime time;
-    int is_day, weather_code, wind_direction_10m,cloud_cover;
-    double temperature_2m, relative_humidity_2m, apparent_temperature, precipitation, rain, pressure_msl, surface_pressure, wind_speed_10m;
-    double wind_gusts_10m;
+class Current extends Equatable{
+    final DateTime time;
+    final int is_day, weather_code, relative_humidity_2m, wind_direction_10m,cloud_cover;
+    final double temperature_2m, apparent_temperature, precipitation, rain, pressure_msl, surface_pressure, wind_speed_10m;
+    final double wind_gusts_10m;
 
-    Current({
+    const Current({
         required this.wind_speed_10m, required this.wind_gusts_10m, required this.wind_direction_10m, required this.time,
         required this.weather_code, required this.temperature_2m, required this.surface_pressure, required this.rain,
         required this.relative_humidity_2m, required this.pressure_msl, required this.is_day,
@@ -53,7 +60,7 @@ class Current{
             wind_direction_10m: JsonParser.parseInt(json, "wind_direction_10m"), time: JsonParser.parseDate(json, "time"),
             weather_code: JsonParser.parseInt(json, "weather_code"), temperature_2m: JsonParser.parseDouble(json, "temperature_2m"),
             surface_pressure: JsonParser.parseDouble(json, "surface_pressure"), rain: JsonParser.parseDouble(json, "rain"),
-            relative_humidity_2m: JsonParser.parseDouble(json, "relative_humidity_2m"), pressure_msl: JsonParser.parseDouble(json, "pressure_msl"),
+            relative_humidity_2m: JsonParser.parseInt(json, "relative_humidity_2m"), pressure_msl: JsonParser.parseDouble(json, "pressure_msl"),
             is_day: JsonParser.parseInt(json, "is_day"), apparent_temperature: JsonParser.parseDouble(json, "apparent_temperature"),
             cloud_cover: JsonParser.parseInt(json, "cloud_cover"), precipitation: JsonParser.parseDouble(json, "precipitation")
         );
@@ -67,13 +74,20 @@ class Current{
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        time,
+        temperature_2m, relative_humidity_2m, apparent_temperature, precipitation, rain, pressure_msl, surface_pressure, wind_speed_10m,
+        weather_code, wind_gusts_10m, is_day, wind_direction_10m,cloud_cover
+    ];
 }
 
-class HourlyUnits {
-    String temperature_2m, relative_humidity_2m, dew_point_2m, apparent_temperature;
-    String precipitation_probability, rain;
+class HourlyUnits extends Equatable{
+    final String temperature_2m, relative_humidity_2m, dew_point_2m, apparent_temperature;
+    final String precipitation_probability, rain;
 
-    HourlyUnits({
+    const HourlyUnits({
         required this.apparent_temperature, required this.relative_humidity_2m, required this.rain,
         required this.temperature_2m, required this.precipitation_probability,
         required this.dew_point_2m
@@ -94,14 +108,20 @@ class HourlyUnits {
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        temperature_2m, dew_point_2m, apparent_temperature, rain,
+        relative_humidity_2m, precipitation_probability
+    ];
 }
 
-class Hourly{
-    List<DateTime> time;
-    List<double> temperature_2m, dew_point_2m, apparent_temperature, rain;
-    List<int> relative_humidity_2m, precipitation_probability, weather_code;
+class Hourly extends Equatable{
+    final List<DateTime> time;
+    final List<double> temperature_2m, dew_point_2m, apparent_temperature, rain;
+    final List<int> relative_humidity_2m, precipitation_probability, weather_code;
 
-    Hourly({
+    const Hourly({
         required this.time, required this.dew_point_2m, required this.precipitation_probability,
         required this.weather_code, required this.temperature_2m, required this.relative_humidity_2m,
         required this.rain, required this.apparent_temperature
@@ -123,13 +143,19 @@ class Hourly{
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        time, temperature_2m, dew_point_2m, apparent_temperature, rain,
+        relative_humidity_2m, precipitation_probability, weather_code
+    ];
 }
 
-class DailyUnits{
-    String temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
-    String precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
+class DailyUnits extends Equatable{
+    final String temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
+    final String precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
 
-    DailyUnits({
+    const DailyUnits({
         required this.apparent_temperature_max,
         required this.apparent_temperature_min, required this.precipitation_sum, required this.temperature_2m_max,
         required this.rain_sum, required this.temperature_2m_min, required this.wind_gusts_10m_max,
@@ -152,15 +178,21 @@ class DailyUnits{
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min,
+        precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max
+    ];
 }
 
-class Daily{
-    List<DateTime> time, sunrise, sunset;
-    List<int> weather_code;
-    List<double> temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
-    List<double> precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
+class Daily extends Equatable{
+    final List<DateTime> time, sunrise, sunset;
+    final List<int> weather_code;
+    final List<double> temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min;
+    final List<double> precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max;
 
-    Daily({
+    const Daily({
         required this.wind_speed_10m_max, required this.wind_gusts_10m_max, required this.sunset, required this.rain_sum,
         required this.temperature_2m_max, required this.precipitation_sum, required this.apparent_temperature_min,
         required this.sunrise, required this.apparent_temperature_max, required this.temperature_2m_min, required this.time,
@@ -184,24 +216,31 @@ class Daily{
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        temperature_2m_max, temperature_2m_min, apparent_temperature_max, apparent_temperature_min,
+        precipitation_sum, rain_sum, wind_speed_10m_max, wind_gusts_10m_max, time, sunrise, sunset,
+        weather_code
+    ];
 }
 
-class Result{
-    double latitude, longitude, generationtime_ms, elevation;
-    int utc_offset_seconds;
-    String timezone, timezone_abbreviation;
+class Result extends Equatable{
+    final double latitude, longitude, elevation;
+    final int utc_offset_seconds;
+    final String timezone, timezone_abbreviation;
 
-    CurrentUnits current_units;
-    Current current;
+    final CurrentUnits current_units;
+    final Current current;
 
-    HourlyUnits hourly_units;
-    Hourly hourly;
+    final HourlyUnits hourly_units;
+    final Hourly hourly;
 
-    DailyUnits daily_units;
-    Daily daily;
+    final DailyUnits daily_units;
+    final Daily daily;
 
-    Result({
-        required this.latitude, required this.longitude, required this.generationtime_ms, required this.elevation,
+    const Result({
+        required this.latitude, required this.longitude, required this.elevation,
         required this.timezone, required this.timezone_abbreviation, required this.utc_offset_seconds,
         required this.current_units, required this.current,
         required this.hourly_units, required this.hourly,
@@ -210,8 +249,9 @@ class Result{
 
     factory Result.fromJson(dynamic json) {
         return Result(
-            latitude: JsonParser.parseDouble(json, "latitude"), longitude: JsonParser.parseDouble(json, "longitude"), generationtime_ms: JsonParser.parseDouble(json, "generationtime_ms"),
-            elevation: JsonParser.parseDouble(json, "elevation"), timezone: JsonParser.parseString(json, "timezone"), timezone_abbreviation: JsonParser.parseString(json, "timezone_abbreviation"),
+            latitude: JsonParser.parseDouble(json, "latitude"), longitude: JsonParser.parseDouble(json, "longitude"),
+            elevation: JsonParser.parseDouble(json, "elevation"), timezone: JsonParser.parseString(json, "timezone"),
+            timezone_abbreviation: JsonParser.parseString(json, "timezone_abbreviation"),
             utc_offset_seconds: JsonParser.parseInt(json, "utc_offset_seconds"),
             current_units: CurrentUnits.fromJson(json["current_units"]), current: Current.fromJson(json["current"]),
             hourly_units: HourlyUnits.fromJson(json["hourly_units"]), hourly: Hourly.fromJson(json["hourly"]),
@@ -220,11 +260,17 @@ class Result{
     }
 
     Map<String, dynamic> toJson() => {
-        "latitude": latitude, "longitude": longitude, "generationtime_ms": generationtime_ms, "elevation": elevation,
+        "latitude": latitude, "longitude": longitude, "elevation": elevation,
         "timezone": timezone, "timezone_abbreviation": timezone_abbreviation, "utc_offset_seconds": utc_offset_seconds,
         "current_units": current_units.toJson(), "current": current.toJson(), "hourly_units": hourly_units.toJson(), "hourly": hourly.toJson(),
         "daily_units": daily_units.toJson(), "daily": daily.toJson()
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [
+        latitude, longitude, elevation, timezone, timezone_abbreviation, utc_offset_seconds,
+        current, current_units, daily_units, daily, hourly, hourly_units
+    ];
 }

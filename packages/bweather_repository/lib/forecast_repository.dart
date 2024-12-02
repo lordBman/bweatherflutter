@@ -1,19 +1,21 @@
 import 'dart:developer';
 
+import 'package:bweather_repository/bweather_repository.dart';
+import 'package:http/http.dart';
+
 import 'package:bweather_open_meteo_api/bweather_open_meteo_api.dart' as api;
 import 'package:bweather_repository/models/city.dart' as city_model;
 import 'package:bweather_repository/models/forecast.dart' as models;
 import 'package:bweather_repository/units.dart';
 
 class ForecastRepository {
-    Units __units;
-    set units(Units value) => __units = value;
+    final api.WeatherClient __client;
 
-    ForecastRepository({ required Units units }): __units = units;
+    ForecastRepository({ Client? httpClient }): __client = api.WeatherClient(httpClient: httpClient ?? Client());
 
-    Future<city_model.City> getWeather(city_model.City city) async {
-        api.City requestCity = api.City(name: city.name, elavation: city.elavation, country: city.country, latitude: city.latitude, longitude: city.longitude);
-        final result = await api.WeatherClient.forecast(requestCity, precipitationUnit: __units.precipitation_unit.serialize, tempUnit: __units.temp_unit.serialize, windSpeedUnit: __units.wind_speed_unit.serialize);
+    Future<city_model.City> getWeather(city_model.City city, { Units units = const Units.defaults() }) async {
+        api.City requestCity = api.City(name: city.name, elevation: city.elevation, country: city.country, latitude: city.latitude, longitude: city.longitude);
+        final result = await __client.forecast(requestCity, precipitationUnit: units.precipitation_unit.serialize, tempUnit: units.temp_unit.serialize, windSpeedUnit: units.wind_speed_unit.serialize);
 
         models.Current current = models.Current(
             apparent_temperature: models.Value(value: result.current.apparent_temperature, unit: result.current_units.apparent_temperature),
@@ -59,16 +61,16 @@ class ForecastRepository {
             current: current, daily: daily, hourly: hourly
         );
         
-        return city_model.City(name: city.name, elavation: result.elevation, country: city.country, latitude: result.latitude, longitude: result.longitude, forecast: forecast);
+        return city_model.City(name: city.name, timezone: result.timezone, elevation: result.elevation, country: city.country, latitude: result.latitude, longitude: result.longitude, forecast: forecast);
     }
 
     Future<List<city_model.City>> search(String query) async{
-        final locations = await api.WeatherClient.locationSearch(query);
+        final locations = await __client.locationSearch(query);
 
         log("Looking for city $query and found $locations");
 
         return locations.map((location)=> city_model.City(
-            name: location.name, country: location.country, elavation: location.elavation,
+            name: location.name, country: location.country, elevation: location.elevation,
             timezone: location.timezone, latitude: location.latitude, longitude: location.longitude
         )).toList();
     }

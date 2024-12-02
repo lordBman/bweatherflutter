@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
+
 enum TempUnit{ fahrenheit, celsius }
 extension TempUnitExtension on TempUnit{
     String get serialize{
@@ -81,15 +83,17 @@ extension PrecipitationUnitParseExtension on String{
   }
 }
 
-class Units {
-    TempUnit temp_unit;
-    WindSpeedUnit wind_speed_unit;
-    PrecipitationUnit precipitation_unit;
+class Units extends Equatable{
+    final TempUnit temp_unit;
+    final WindSpeedUnit wind_speed_unit;
+    final PrecipitationUnit precipitation_unit;
 
-    Units({
+    const Units({
         this.temp_unit = TempUnit.celsius, this.wind_speed_unit = WindSpeedUnit.ms,
         this.precipitation_unit = PrecipitationUnit.mm,
     });
+
+    const Units.defaults() : temp_unit = TempUnit.celsius, wind_speed_unit = WindSpeedUnit.ms, precipitation_unit = PrecipitationUnit.mm;
 
     factory Units.fromJson(dynamic json) {
         return Units(
@@ -98,10 +102,21 @@ class Units {
             precipitation_unit: json["precipitation_unit"].toString().precipitationUnit);
     }
 
-    Map toJson() => {
+    Units copy({ TempUnit? temp_unit, WindSpeedUnit? wind_speed_unit, PrecipitationUnit? precipitation_unit }){
+        return Units(
+            temp_unit: temp_unit ?? this.temp_unit,
+            precipitation_unit: precipitation_unit ?? this.precipitation_unit,
+            wind_speed_unit: wind_speed_unit ?? this.wind_speed_unit
+        );
+    }
+
+    Map<String, dynamic> toJson() => {
         "temp_unit" : temp_unit.serialize, "wind_speed_unit": wind_speed_unit.serialize,
         "precipitation_unit": precipitation_unit.serialize,
     };
 
     String serialize() => jsonEncode(toJson());
+
+    @override
+    List<Object?> get props => [ temp_unit.serialize, precipitation_unit.serialize, wind_speed_unit.serialize ];
 }

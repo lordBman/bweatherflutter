@@ -28,7 +28,7 @@ class CitiesState{
 }
 
 class CitiesCubit extends Cubit<CitiesState>{
-    final ForecastRepository __repository = ForecastRepository(units: Units());
+    final ForecastRepository __repository = ForecastRepository();
 
     set sortBy(SortBy sortBy){
         emit(state.copy(sortBy: sortBy));

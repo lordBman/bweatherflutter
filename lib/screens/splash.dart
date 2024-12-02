@@ -1,4 +1,5 @@
 import 'package:bweatherflutter/components/error.dart';
+import 'package:bweatherflutter/screens/main.dart';
 import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';

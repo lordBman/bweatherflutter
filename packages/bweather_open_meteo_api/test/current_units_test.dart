@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('CurrentUnits', () {
     group('Constructor', () {
-      test('returns an instance Current Units object with Contructor', () {
-        expect(CurrentUnits( temperature_2m: "°C", relative_humidity_2m: "%", apparent_temperature: "°C", pressure_msl: "hPa", precipitation: "mm",
+      test('returns an instance Current Units object with Constructor', () {
+        expect(const CurrentUnits( temperature_2m: "°C", relative_humidity_2m: "%", apparent_temperature: "°C", pressure_msl: "hPa", precipitation: "mm",
             rain: "mm", cloud_cover: "%", surface_pressure: "hPa", wind_speed_10m: "km/h", wind_direction_10m: "°", wind_gusts_10m: "km/h"),
             isA<CurrentUnits>()
                 .having((c) => c.precipitation, 'precipitation', 'mm')
@@ -26,7 +26,7 @@ void main() {
     });
     group('fromJson', () {
       test('returns correct CurrentUnits object from json map', () {
-        expect(CurrentUnits.fromJson(<String, dynamic>{
+        expect(CurrentUnits.fromJson(const <String, dynamic>{
           "temperature_2m": "°C", "relative_humidity_2m": "%", "apparent_temperature": "°C", "precipitation": "mm",
           "rain": "mm", "cloud_cover": "%", "pressure_msl": "hPa", "surface_pressure": "hPa",
           "wind_speed_10m": "km/h", "wind_direction_10m": "°", "wind_gusts_10m": "km/h"
@@ -66,7 +66,7 @@ void main() {
     });
     group('toJson', () {
       test('returns a map json of Current Units object', () {
-        expect(CurrentUnits( temperature_2m: "°C", relative_humidity_2m: "%", apparent_temperature: "°C", pressure_msl: "hPa", precipitation: "mm",
+        expect(const CurrentUnits( temperature_2m: "°C", relative_humidity_2m: "%", apparent_temperature: "°C", pressure_msl: "hPa", precipitation: "mm",
             rain: "mm", cloud_cover: "%", surface_pressure: "hPa", wind_speed_10m: "km/h", wind_direction_10m: "°", wind_gusts_10m: "km/h").toJson(),
             isA<Map<String, dynamic>>()
                 .having((c) => c["precipitation"], 'precipitation', 'mm')

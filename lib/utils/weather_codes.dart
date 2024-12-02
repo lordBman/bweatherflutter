@@ -103,7 +103,7 @@ class WeatherCode{
     factory WeatherCode.decode({ required int code, required bool isNight }){
         String image = (isNight ? __nightImages[code] : __dayImages[code]) ?? "";
 
-        return WeatherCode(image: image, description: __descriptions[code] ?? "unknown");
+        return WeatherCode(image: "files/icons/$image", description: __descriptions[code] ?? "unknown");
     }
 }
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:bweather_repository/models/city.dart';
 import 'package:bweatherflutter/states/forecast/city_state.dart';
 import 'package:bweatherflutter/utils/status.dart';
 import 'package:equatable/equatable.dart';

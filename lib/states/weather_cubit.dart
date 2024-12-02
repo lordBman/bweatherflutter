@@ -13,7 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class WeatherCubit extends HydratedCubit<WeatherState>{
-    final ForecastRepository __repository = ForecastRepository(units: Units());
+    final ForecastRepository __repository;
     final SettingsCubit __settingsCubit;
 
     late void Function()? __toHomeListener;
@@ -21,16 +21,9 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         __toHomeListener = homeListener;
     }
 
-    late void Function()? __proceedListener;
-    set proceedListener(void Function() proceedListener){
-        __proceedListener = proceedListener;
-    }
-
-    bool __proceeded = false;
-
     late StreamSubscription<List<ConnectivityResult>> subscription;
 
-    WeatherCubit(this.__settingsCubit): super(const WeatherState()){
+    WeatherCubit(this.__settingsCubit, { ForecastRepository? repository }): __repository = repository ?? ForecastRepository(), super(const WeatherState()){
         __settingsCubit.weatherCubit = this;
 
         subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -45,10 +38,6 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
 
         if(state.cities.isNotEmpty){
             initForecast();
-            if(__proceedListener != null){
-                __proceedListener!();
-                __proceeded = true;
-            }
         }
         init();
     }
@@ -62,11 +51,12 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
                     //City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, elavation: position.altitude, latitude: position.latitude, longitude: position.longitude);
                     log("looking positional data of ${placemarks[0].locality!}");
                     List<City> list =  await __repository.search(placemarks[0].locality!);
-                    List<CityState> init = state.cities;
+                    List<CityState> init = [...state.cities];
                     if(init.isNotEmpty){
-                        if(init.first.city.country != list.first.country && init.first.city.name != list.first.name){
-                            init.removeAt(0);
-                        }
+                        /*if(init.first.city.country != list.first.country && init.first.city.name != list.first.name){
+                            ;
+                        }*/
+                        init.removeAt(0);
                         init.insert(0, CityState(city: list.first));
                     }else if(init.isEmpty){
                         init.add(CityState(city: list.first));
@@ -76,10 +66,6 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
                     log("location error:", error: error);
                     emit(state.copy(error: error, status: StateStatus.failure, message: "Encountered an unexpected error, check your internet connection"));
                 }).whenComplete((){
-                    if(state.cities.isNotEmpty && !__proceeded && __proceedListener != null){
-                        __proceedListener!();
-                        __proceeded = true;
-                    }
                     initForecast();
                 });
             }
@@ -120,7 +106,7 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
     }
 
     void __updateCity(int index, CityState cityState){
-        List<CityState> init = state.cities..replaceRange(index, index + 1, [cityState]);
+        List<CityState> init = [...state.cities]..replaceRange(index, index + 1, [cityState]);
         emit(state.copy(cities: init));
     }
 
@@ -130,13 +116,13 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         cityState = cityState.copy(status: StateStatus.loading, message: "Getting weather forecast for ${cityState.city.name}");
         __updateCity(index, cityState);
         try{
-            __repository.units = Units(
+            Units units = Units(
                 temp_unit: __settingsCubit.state.temp_unit, 
                 precipitation_unit: __settingsCubit.state.precipitation_unit,
                 wind_speed_unit: __settingsCubit.state.wind_speed_unit
             );
 
-            City response = await __repository.getWeather(cityState.city);
+            City response = await __repository.getWeather(cityState.city, units: units);
             __updateCity(index, cityState.copy(city: response, status: StateStatus.success));
         }catch(error){
             __updateCity(index, cityState.copy(error: error, status: StateStatus.failure));
@@ -163,27 +149,29 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
 
     Future<void> addCity(City city) async{
         if(!exist(city.name )){
-            List<CityState> init = state.cities..add(CityState(city: city));
+            List<CityState> init = [...state.cities, CityState(city: city)];
             emit(state.copy(cities: init));
             
             forecast(init.last);
         }
     }
 
-    Future<void> requestCity(String name) async{
-        try{
-            City city = ( await __repository.search(name)).first;
+    Future<void> requestCity(String? name) async{
+        if(name != null || name!.isNotEmpty){
+            try{
+                City city = ( await __repository.search(name)).first;
 
-            await addCity(city);
-        }catch(error){
-            log("adding City error", error: error);
-            Future.error("Adding $name city failed, check your internet connection try again");
+                await addCity(city);
+            }catch(error){
+                log("adding City error", error: error);
+                Future.error("Adding $name city failed, check your internet connection try again");
+            }
         }
     }
 
     void remove(int index){
         try{
-            List<CityState> init = state.cities..removeAt(index);
+            List<CityState> init = [...state.cities]..removeAt(index);
             emit(state.copy(cities: init));
         }catch(error){
             log("location remove error", error: error);
@@ -204,8 +192,8 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         }
     }
 
-    Future<void> reloadCityForecast(CityState citystate) async{
-        await forecast(citystate);
+    Future<void> reloadCityForecast(CityState cityState) async{
+        await forecast(cityState);
     }
 
     @override

@@ -5,9 +5,11 @@ import 'package:bweatherflutter/screens/info.dart';
 import 'package:bweatherflutter/screens/not_found.dart';
 import 'package:bweatherflutter/screens/splash.dart';
 import 'package:bweatherflutter/states/cities_cubit.dart';
+import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/main_cubit.dart';
 import 'package:bweatherflutter/states/settings_cubit.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
+import 'package:bweatherflutter/utils/status.dart';
 import 'package:bweatherflutter/utils/theme.dart';
 import 'package:bweatherflutter/utils/utils.dart';
 
@@ -68,14 +70,9 @@ class App extends StatelessWidget{
     }
 }
 
-class BWeather extends StatefulWidget {
+class BWeather extends StatelessWidget {
     const BWeather({super.key});
 
-    @override
-    State<BWeather> createState() => __BWeatherState();
-}
-
-class __BWeatherState extends State<BWeather> {
     @override
     Widget build(BuildContext context) {
         TextTheme textTheme = createTextTheme(context, "Noto Sans Mono", "Acme");
@@ -95,21 +92,25 @@ class __BWeatherState extends State<BWeather> {
                     theme: theme.light(),
                     darkTheme: theme.dark(),
                     themeMode: state.themeModeValue,
-                    initialRoute: Splash.routeName,
+                    initialRoute: MainScreen.routeName,
                     onGenerateRoute: (settings) {
                         return MaterialPageRoute(builder: (context) {
-                            switch (settings.name) {
-                                case Splash.routeName:
+                            return BlocBuilder<WeatherCubit, WeatherState>(builder: (_, weatherState){
+                                if(weatherState.status == StateStatus.loading && weatherState.cities.isEmpty){
                                     return const Splash();
-                                case Info.routeName:
-                                    return const Info();
-                                case MainScreen.routeName:
-                                    return MainScreen();
-                                case CitiesScreen.routeName:
-                                    return const CitiesScreen();
-                                default:
-                                    return const NotFound();
-                            }
+                                }
+
+                                switch (settings.name) {
+                                    case Info.routeName:
+                                        return const Info();
+                                    case MainScreen.routeName:
+                                        return MainScreen();
+                                    case CitiesScreen.routeName:
+                                        return const CitiesScreen();
+                                    default:
+                                        return const NotFound();
+                                }
+                            });
                         });
                     }),
             )

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Current', () {
     group('Constructor', () {
-      test('returns an instance Current object with Contructor', () {
+      test('returns an instance Current object with Constructor', () {
         expect(Current( time: DateTime.parse("2024-11-25T12:30"), temperature_2m: 12.1, relative_humidity_2m: 65, apparent_temperature: 9.2, is_day: 1,
             precipitation: 0, rain: 0, weather_code: 3, cloud_cover: 100, pressure_msl: 1008.9, surface_pressure: 1004.3, wind_speed_10m: 12.8,
             wind_direction_10m: 158, wind_gusts_10m: 29.5),

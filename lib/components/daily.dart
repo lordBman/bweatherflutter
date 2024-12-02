@@ -1,5 +1,6 @@
 import 'package:bweather_repository/bweather_repository.dart';
 import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
