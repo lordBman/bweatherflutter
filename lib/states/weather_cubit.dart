@@ -21,6 +21,13 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         __toHomeListener = homeListener;
     }
 
+    /*late void Function()? __onProceedListener;
+    set onProceedListener(void Function() proceedListener){
+        __onProceedListener = proceedListener;
+    }*/
+
+    bool get hasExistingData => HydratedBloc.storage.read(runtimeType.toString()) != null;
+
     late StreamSubscription<List<ConnectivityResult>> subscription;
 
     WeatherCubit(this.__settingsCubit, { ForecastRepository? repository }): __repository = repository ?? ForecastRepository(), super(const WeatherState()){
@@ -35,44 +42,33 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
                 }
             }
         });
-
-        if(state.cities.isNotEmpty){
-            initForecast();
-        }
         init();
     }
 
-    void init (){
+    Future<void> init () async{
+        __initForecast();
         emit(state.copy(status: StateStatus.loading, message: "Getting user current location"));
 
-        __determinePosition().then((position){
+        try{
+            final position = await __determinePosition();
             if(position != null){
-                placemarkFromCoordinates(position.latitude, position.longitude).then((placemarks) async{
-                    //City city = City(name: placemarks[0].locality!, country: placemarks[0].country!, elavation: position.altitude, latitude: position.latitude, longitude: position.longitude);
-                    log("looking positional data of ${placemarks[0].locality!}");
-                    List<City> list =  await __repository.search(placemarks[0].locality!);
-                    List<CityState> init = [...state.cities];
-                    if(init.isNotEmpty){
-                        /*if(init.first.city.country != list.first.country && init.first.city.name != list.first.name){
-                            ;
-                        }*/
-                        init.removeAt(0);
-                        init.insert(0, CityState(city: list.first));
-                    }else if(init.isEmpty){
-                        init.add(CityState(city: list.first));
-                    }
-                    emit(state.copy(cities: init, status: StateStatus.success));          
-                }).onError((error, strace){
-                    log("location error:", error: error);
-                    emit(state.copy(error: error, status: StateStatus.failure, message: "Encountered an unexpected error, check your internet connection"));
-                }).whenComplete((){
-                    initForecast();
-                });
+                final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+
+                log("looking positional data of ${placemarks[0].locality!}");
+                List<City> list =  await __repository.search(placemarks[0].locality!);
+                if(state.location != null && state.location!.city.country != list.first.country && state.location!.city.name != list.first.name){
+                    emit(state.copy(status: StateStatus.success));
+                }else{
+                    emit(state.copy(location: CityState(city: list.first), status: StateStatus.success));
+                    __initForecast();
+                }
+            }else{
+                emit(state.copy(error: "", status: StateStatus.failure, message: "unable to determine your current location"));
             }
-        }).onError((error, strace){
+        }catch(error){
             log("location error:", error: error);
             emit(state.copy(error: error, status: StateStatus.failure, message: "Encountered an unexpected error, check your internet connection"));
-        });
+        }
     }
 
     Future<Position?> __determinePosition() async {
@@ -85,7 +81,7 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         }
 
         permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied && state.cities.isEmpty) {
+        if(permission == LocationPermission.denied && state.cities.isEmpty) {
             permission = await Geolocator.requestPermission();
             if (permission == LocationPermission.denied) {
                 await SystemNavigator.pop();
@@ -94,7 +90,7 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
             }
         }
       
-        if (permission == LocationPermission.deniedForever && state.cities.isEmpty) {
+        if(permission == LocationPermission.deniedForever && state.cities.isEmpty){
             emit(state.copy(message: "Location permission is needed to run the Application", status: StateStatus.failure));
             return Future.error('Location permissions are permanently denied, we cannot request permissions.');
         }
@@ -106,8 +102,12 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
     }
 
     void __updateCity(int index, CityState cityState){
-        List<CityState> init = [...state.cities]..replaceRange(index, index + 1, [cityState]);
-        emit(state.copy(cities: init));
+        if(index == -1){
+            emit(state.copy(location: cityState));
+        }else{
+            List<CityState> init = [...state.cities]..replaceRange(index, index + 1, [cityState]);
+            emit(state.copy(cities: init));
+        }
     }
 
     Future<void> forecast(CityState cityState) async{
@@ -130,15 +130,15 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         }
     }
 
-    void initForecast(){
-        if(state.status.isSuccess){
-            for (var cityState in state.cities) { 
+    void __initForecast(){
+        for(CityState? cityState in [state.location, ...state.cities]) {
+            if(cityState != null) {
                 forecast(cityState);
             }
         }
     }
 
-    bool exist(String name){
+    bool __exist(String name){
         for (var element in state.cities) {
             if(element.city.name == name){
                 return true;
@@ -148,10 +148,9 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
     }
 
     Future<void> addCity(City city) async{
-        if(!exist(city.name )){
+        if(!__exist(city.name)){
             List<CityState> init = [...state.cities, CityState(city: city)];
             emit(state.copy(cities: init));
-            
             forecast(init.last);
         }
     }
@@ -159,7 +158,7 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
     Future<void> requestCity(String? name) async{
         if(name != null || name!.isNotEmpty){
             try{
-                City city = ( await __repository.search(name)).first;
+                City city = (await __repository.search(name)).first;
 
                 await addCity(city);
             }catch(error){
@@ -171,7 +170,7 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
 
     void remove(int index){
         try{
-            List<CityState> init = [...state.cities]..removeAt(index);
+            List<CityState> init = [...state.cities]..removeAt(index - 1);
             emit(state.copy(cities: init));
         }catch(error){
             log("location remove error", error: error);
@@ -185,12 +184,20 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
     }
 
     Future<void> reload({ bool force = false }) async{
-        for (var element in state.cities) {
-            if(element.status.isFailure || force){
-                forecast(element);
+        for (CityState? element in [state.location, ...state.cities]) {
+            if(element != null && element.status.isFailure || force){
+                forecast(element!);
             }
         }
     }
+
+    /*@override
+    void onChange(Change<WeatherState> change) {
+        super.onChange(change);
+        if(change.currentState.location == null && change.nextState.location != null && __onProceedListener != null){
+            __onProceedListener!();
+        }
+    }*/
 
     Future<void> reloadCityForecast(CityState cityState) async{
         await forecast(cityState);
@@ -198,11 +205,21 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
 
     @override
     WeatherState? fromJson(Map<String, dynamic> json) {
-        return WeatherState.fromJson(json);
+        try{
+            return WeatherState.fromJson(json);
+        }catch(err, stack){
+            log("Weather State deserialization error", error: err, stackTrace: stack);
+        }
+        return null;
     }
 
     @override
     Map<String, dynamic>? toJson(WeatherState state) {
-        return state.toJson();
+        try{
+            return state.toJson();
+        }catch(err){
+            log("Weather State serialization error", error: err);
+        }
+        return null;
     }
 }

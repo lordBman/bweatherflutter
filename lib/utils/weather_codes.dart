@@ -16,6 +16,7 @@ const Map<int, String> __dayImages = {
   65: 'meteocons--extreme-day-rain-fill.svg', //'Rain, heavy',
   66: 'meteocons--overcast-rain-fill.svg',   //'Freezing rain, slight',
   67: 'meteocons--extreme-rain-fill.svg',    //'Freezing rain, heavy',
+  71: 'meteocons--snow-fill.svg', //'Snow fall, slight',
   73: 'meteocons--extreme-day-snow-fill.svg',   //'Snow fall, moderate',
   75: 'meteocons--extreme-snow-fill.svg',   //'Snow fall, heavy',
   77: 'meteocons--snow-fill.svg',   //'Snow grains',

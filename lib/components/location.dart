@@ -29,7 +29,7 @@ class __LocationItemState extends State<LocationItem>{
 
         return BlocBuilder<WeatherCubit, WeatherState>(
             builder: (context, state){
-                CityState cityState = state.cities[widget.index];
+                CityState cityState = widget.index == -1 ? state.location! : state.cities[widget.index];
 
                 if(cityState.status.isLoading){
                     return const LocationItemShimmering();
@@ -49,7 +49,7 @@ class __LocationItemState extends State<LocationItem>{
                     isNight = !current.is_day;
                 }
 
-                return Clickable(clicked: (){ context.read<MainCubit>().index = widget.index; },
+                return Clickable(clicked: (){ context.read<MainCubit>().index = widget.index + 1; },
                     child: Container(
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: theme.surfaceContainerHigh,
@@ -65,7 +65,7 @@ class __LocationItemState extends State<LocationItem>{
                                       Row(
                                         children: [
                                             Expanded(child: Text(cityState.city.name, maxLines: 1, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: theme.primary))),
-                                            Visibility(visible: widget.index != 0, child: Container(alignment: Alignment.centerRight,
+                                            Visibility(visible: widget.index != -1, child: Container(alignment: Alignment.centerRight,
                                                 child: IconButton(style: const ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.zero)), icon: const Icon(Icons.cancel_outlined), color: theme.error, onPressed: (){ context.read<WeatherCubit>().remove(widget.index); }),)),
                                         ],
                                       ),

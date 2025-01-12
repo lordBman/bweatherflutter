@@ -22,10 +22,10 @@ class __OthersState extends State<Others>{
     List<Widget> init(Forecast forecast){
         List<Daily> daily = forecast.daily;
         final List<Hourly> hourly = forecast.hourly;
-        final length = active == "hourly" ? hourly.length : daily.length;
+        final length = active == "hourly" ? (hourly.length -  forecast.current.time.hour): daily.length;
 
         return List.generate(length, (index){
-            var child = active == "hourly" ? HourlyView(hourly: hourly[index]) : DailyView(daily: daily[index]);
+            var child = active == "hourly" ? HourlyView(hourly: hourly[index + forecast.current.time.hour]) : DailyView(daily: daily[index]);
             return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DecoratedBox( decoration: BoxDecoration(color: theme.surfaceContainerHigh,

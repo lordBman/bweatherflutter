@@ -80,40 +80,44 @@ class BWeather extends StatelessWidget {
         MaterialTheme theme = MaterialTheme(textTheme);
         SettingsCubit settingsCubit = context.read<SettingsCubit>();
 
-        return MultiBlocProvider(
-            providers: [
-                BlocProvider(create: (context) => CitiesCubit()),
-                BlocProvider(create: (context) => MainCubit()),
-                BlocProvider(create: (context) => WeatherCubit(settingsCubit)),
-            ],
-            child: BlocBuilder<SettingsCubit, SettingsState>(
-                builder: (context, state) => MaterialApp(title: 'BSoft Weather App',
-                    debugShowCheckedModeBanner: false,
-                    theme: theme.light(),
-                    darkTheme: theme.dark(),
-                    themeMode: state.themeModeValue,
-                    initialRoute: MainScreen.routeName,
-                    onGenerateRoute: (settings) {
-                        return MaterialPageRoute(builder: (context) {
-                            return BlocBuilder<WeatherCubit, WeatherState>(builder: (_, weatherState){
-                                if(weatherState.status == StateStatus.loading && weatherState.cities.isEmpty){
-                                    return const Splash();
-                                }
+        return BlocBuilder<SettingsCubit, SettingsState>(
+            builder: (context, state) {
+                return MultiBlocProvider(
+                    providers: [
+                        BlocProvider(create: (context) => CitiesCubit()),
+                        BlocProvider(create: (context) => MainCubit()),
+                        BlocProvider(create: (context) => WeatherCubit(settingsCubit)),
+                    ],
+                    child: MaterialApp(title: 'BSoft Weather App',
+                        debugShowCheckedModeBanner: false,
+                        theme: theme.light(),
+                        darkTheme: theme.dark(),
+                        themeMode: state.themeModeValue,
+                        initialRoute: MainScreen.routeName,
+                        onGenerateRoute: (settings) {
+                            return MaterialPageRoute(builder: (context) {
+                                return BlocBuilder<WeatherCubit, WeatherState>(
+                                    builder: (context, weatherState){
+                                        if(weatherState.location == null){
+                                            return const Splash();
+                                        }
 
-                                switch (settings.name) {
-                                    case Info.routeName:
-                                        return const Info();
-                                    case MainScreen.routeName:
-                                        return MainScreen();
-                                    case CitiesScreen.routeName:
-                                        return const CitiesScreen();
-                                    default:
-                                        return const NotFound();
-                                }
+                                        switch (settings.name) {
+                                            case Info.routeName:
+                                                return const Info();
+                                            case MainScreen.routeName:
+                                                return const MainScreen();
+                                            case CitiesScreen.routeName:
+                                                return const CitiesScreen();
+                                            default:
+                                                return const NotFound();
+                                        }
+                                    }
+                                );
                             });
-                        });
-                    }),
-            )
+                        })
+                );
+            }
         );
     }
 }

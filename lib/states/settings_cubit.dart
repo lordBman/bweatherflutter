@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:bweather_repository/bweather_repository.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
@@ -91,15 +92,27 @@ class SettingsCubit extends HydratedCubit<SettingsState>{
         }
     }
 
+    bool get hasExistingData => HydratedBloc.storage.read(runtimeType.toString()) != null;
+
     SettingsCubit(): super(const SettingsState());
 
     @override
     SettingsState? fromJson(Map<String, dynamic> json) {
-        return SettingsState.fromJson(json);
+        try{
+            return SettingsState.fromJson(json);
+        }catch(err){
+            log("Settings State deserialization error", error: err);
+        }
+        return null;
     }
 
     @override
     Map<String, dynamic>? toJson(SettingsState state) {
-        return state.toJson();
+        try{
+            return state.toJson();
+        }catch(err){
+            log("Settings State serialization error", error: err);
+        }
+        return null;
     }
 }

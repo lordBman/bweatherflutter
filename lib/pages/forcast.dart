@@ -34,13 +34,6 @@ class __ForecastPage extends State<ForecastPage>{
     @override
     Widget build(BuildContext context) {
         weatherCubit = context.read<WeatherCubit>();
-        /*mainProvider.indexListener = (index){
-            pageController.animateToPage(index, duration: const Duration(seconds: 2), curve: Curves.easeOutCirc);
-        };*/
-
-        /*if(weatherNotifier.loading){
-            return Loading(message: weatherNotifier.message);
-        }*/
 
         return BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state){
             if(state.status.isFailure){
@@ -51,8 +44,8 @@ class __ForecastPage extends State<ForecastPage>{
                 builder: (context, mainState) {
                     return PageView.builder(
                         controller: PageController(initialPage: mainState.index),
-                        itemBuilder: (context, index) => ForecastView(index: index),
-                        itemCount: state.cities.length,);
+                        itemBuilder: (context, index) => ForecastView(index: index - 1),
+                        itemCount: state.cities.length + 1);
                 }
             );
         });

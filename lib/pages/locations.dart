@@ -54,9 +54,7 @@ class __LocationsState extends State<Locations>{
                   leading: const Icon(Icons.map_outlined),
                   title: Text("Cities", style: TextStyle(color: theme.onSurface, fontSize: 20),)),
               SliverFillRemaining(child: LiquidPullRefresh(
-                  onRefresh: () async{
-                      await weatherCubit.reload(force: true);
-                  },
+                  onRefresh: () async{ await weatherCubit.reload(force: true); },
                   showChildOpacityTransition: false,
                   backgroundColor: theme.surface,
                   animSpeedFactor: 2.0,
@@ -70,12 +68,12 @@ class __LocationsState extends State<Locations>{
                       builder: (context, state) {
                           return ListView.separated(
                               controller: __scrollController,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              itemCount: state.cities.length,
+                              padding: const EdgeInsets.only(top: 20, bottom: 20),
+                              itemCount: state.cities.length + 1,
                               separatorBuilder: (context, index) => const SizedBox(height: 15),
                               itemBuilder: (context, index) => Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 15),
-                                  child: LocationItem(index: index),
+                                  child: LocationItem(index: index - 1),
                               ),
                               //separatorBuilder: (context, index) => const SizedBox(height: 15,),
                           );
