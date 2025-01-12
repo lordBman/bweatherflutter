@@ -60,7 +60,7 @@ class MaterialTheme {
   }
 
   static ColorScheme lightMediumContrastScheme() {
-    return const ColorScheme(
+    return const ColorScheme.light(
       brightness: Brightness.light,
       primary: Color(0xff004574),
       surfaceTint: Color(0xff0062a1),
@@ -115,7 +115,7 @@ class MaterialTheme {
   }
 
   static ColorScheme lightHighContrastScheme() {
-    return const ColorScheme(
+    return const ColorScheme.light(
       brightness: Brightness.light,
       primary: Color(0xff002440),
       surfaceTint: Color(0xff0062a1),

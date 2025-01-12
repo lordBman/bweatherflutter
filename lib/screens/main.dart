@@ -1,12 +1,16 @@
 import 'package:bweatherflutter/pages/forcast.dart';
 import 'package:bweatherflutter/pages/locations.dart';
 import 'package:bweatherflutter/pages/settings.dart';
-import 'package:bweatherflutter/providers/main.dart';
-import 'package:bweatherflutter/providers/weather.dart';
+import 'package:bweatherflutter/states/main_cubit.dart';
+import 'package:bweatherflutter/states/weather_cubit.dart';
+//import 'package:bweatherflutter/utils/notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
+    static const String routeName = "main";
+    //final NotificationManager notificationManager = NotificationManager();
+
     const MainScreen({super.key});
 
     @override
@@ -14,39 +18,32 @@ class MainScreen extends StatefulWidget {
 }
 
 class __MainScreenState extends State<MainScreen> {
-    late MainProvider mainProvider;
-    late WeatherNotifer weatherNotifer;
 
-    final pages =  [ const ForcastPage(), const Locations(), const Settings()];
-
-    Widget currentPage () =>pages[mainProvider.pageIndex];
-
-    void home(){
-        mainProvider.setPage(0);
-    }
+    final List<Widget> pages =  [ const ForecastPage(), Locations(), const Settings()];
 
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
-        mainProvider = Provider.of<MainProvider>(context, listen: true);
-        weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
-        weatherNotifer.setHomeListener(home);
+        MainCubit mainCubit = context.read<MainCubit>();
+        context.read<WeatherCubit>().toHomeListener = ()=> mainCubit.pageIndex = 0;
 
-        /*if(!weatherNotifer.savedCities[0].isError){
-            ElegantNotification.info(description:  const Text('This account will be updated once you exit',),).show(context);
-        }*/
-
-        return Scaffold(
-            body: SafeArea( child: currentPage()), backgroundColor: theme.surface,
-            bottomNavigationBar: NavigationBar(
-                onDestinationSelected: (int index) => mainProvider.setPage(index),
-                selectedIndex: mainProvider.pageIndex, indicatorColor: theme.secondaryFixed,
-                destinations: const <Widget>[
-                    NavigationDestination(selectedIcon: Icon(Icons.cloud, color: Colors.white), icon: Icon(Icons.cloud_outlined), label: 'Forcast'),
-                    NavigationDestination(selectedIcon: Icon(Icons.map, color: Colors.white), icon: Icon(Icons.map_outlined), label: 'Locations'),
-                    NavigationDestination(selectedIcon: Icon(Icons.settings, color: Colors.white,), icon: Icon(Icons.settings_outlined), label: 'Settings'),
-                  
-                ],
+        return BlocBuilder<MainCubit, MainState>(
+            builder: (context, state) =>  Scaffold(
+                body: pages[state.pageIndex], //backgroundColor: theme.surface,
+                floatingActionButton: Visibility(visible: state.showFAO, child: FloatingActionButton(backgroundColor: theme.secondary,
+                    onPressed: () { Navigator.pushNamed(context, "cities");  }, //widget.notificationManager.showNotification();
+                    child: const Icon(Icons.add_location_alt),
+                )),
+                bottomNavigationBar: NavigationBar(
+                    onDestinationSelected: (int index) => mainCubit.pageIndex = index,
+                    selectedIndex: state.pageIndex,
+                    destinations: const <Widget>[
+                        NavigationDestination(selectedIcon: Icon(Icons.cloud, color: Colors.white,), icon: Icon(Icons.cloud_outlined), label: 'Forecast'),
+                        NavigationDestination(selectedIcon: Icon(Icons.map, color: Colors.white), icon: Icon(Icons.map_outlined), label: 'Locations'),
+                        NavigationDestination(selectedIcon: Icon(Icons.settings, color: Colors.white,), icon: Icon(Icons.settings_outlined), label: 'Settings'),
+                      
+                    ],
+                ),
             ),
         );
     }

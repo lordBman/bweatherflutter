@@ -1,14 +1,22 @@
 import 'dart:async';
 
-import 'package:after_layout/after_layout.dart';
+import 'package:bweather_repository/bweather_repository.dart';
+import 'package:bweatherflutter/components/details.dart';
 import 'package:bweatherflutter/components/error.dart';
-import 'package:bweatherflutter/components/loading.dart';
 import 'package:bweatherflutter/components/others.dart';
-import 'package:bweatherflutter/providers/settings.dart';
-import 'package:bweatherflutter/providers/weather.dart';
+import 'package:bweatherflutter/components/refresh.dart';
+import 'package:bweatherflutter/components/shimmering/forcast.dart';
+import 'package:bweatherflutter/states/forecast/city_state.dart';
+import 'package:bweatherflutter/states/forecast/weather_state.dart';
+import 'package:bweatherflutter/states/weather_cubit.dart';
+import 'package:bweatherflutter/utils/status.dart';
 import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:liquid_pull_refresh/liquid_pull_refresh.dart';
 import 'package:provider/provider.dart';
 
 class ForecastView extends StatefulWidget{
@@ -17,111 +25,138 @@ class ForecastView extends StatefulWidget{
     const ForecastView({super.key, required this.index});
 
     @override
-    State<StatefulWidget> createState() => __ForecastStatePageState();
+    State<StatefulWidget> createState() => __CityStatePageState();
 }
 
-class __ForecastStatePageState extends State<ForecastView> with AfterLayoutMixin<ForecastView>{
-    late WeatherNotifer weatherNotifer;
-    late SettingsNotifier settingsNotifier;
+class __CityStatePageState extends State<ForecastView> {
+    final GlobalKey<LiquidPullRefreshState> refreshIndicatorKey = GlobalKey<LiquidPullRefreshState>();
+
+    late WeatherCubit weatherCubit;
+    late WeatherState weatherState;
+
+    Future<bool> refresh() async{
+        await weatherCubit.reloadCityForecast(weatherState.cities[widget.index]);
+
+        return true;
+    }
 
     @override
-    FutureOr<void> afterFirstLayout(BuildContext context) {
-        
+    void initState() {
+        super.initState();
     }
 
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
 
-        WeatherNotifer weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
-        settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
-        
-        ForcastState forecastState = weatherNotifer.savedCities[widget.index];
+        weatherCubit = context.read<WeatherCubit>();
 
-        if(forecastState.loading){
-            return Loading(message: forecastState.message);
-        }
+        return BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state){
+            CityState? cityState = widget.index == -1 ? state.location : state.cities[widget.index];
 
-        if (forecastState.isError){
-            return const ErrorView(message: "Encontered an unexpected error when fetching Forcast, check your internet connection");
-        }
-        
-        String currentTime(){
-            DateTime init = DateTime.now();
-            return "${day(init.weekday)}, ${ init.day } ${ month(init.month) }";
-        }
+            if(cityState == null || (cityState.status.isLoading && cityState.city.forecast == null)){
+                return const ForecastShimmering();
+            }
 
-        int current = settingsNotifier.value(forecastState.result["current"]["temp"] as double);
-        //int like = settingsNotifier.getUnit() == Unit.farighet ? celciustToFahrenheit(forecastState.result["current"]["feels_like"]) : forecastState.result["current"]["feels_like"].ceil();
+            if (cityState.status.isFailure || cityState.city.forecast == null){
+                return const ErrorView(message: "Encountered an unexpected error when fetching Forecast, check your internet connection");
+            }
 
-        return Column(crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-                Container(alignment: Alignment.centerRight, padding: const EdgeInsets.only(top: 5, right: 8), 
-                    child: IconButton(icon: const Icon(Icons.add_location_alt,  size: 28),
-                    onPressed: (){ Navigator.pushNamed(context, "/cities"); },
-                    color: theme.secondaryFixed),),
-                const SizedBox(height: 15,),
-                Expanded(
-                    child: Center(child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min,
-                      children: [
-                          Text(forecastState.city.name, style: TextStyle(color: theme.primary, fontSize: 36, fontWeight: FontWeight.w300)),
-                          Text(forecastState.city.country, style: const TextStyle(color: Colors.blueGrey, fontSize: 14, fontWeight: FontWeight.w300)),
-                          const SizedBox(height: 10,),
-                          Text(currentTime() , style: const TextStyle(color: Color.fromARGB(255, 19, 28, 33), fontSize: 18, fontWeight: FontWeight.w300)),
-                          Row(mainAxisSize: MainAxisSize.min,
-                              children: [
-                                  Text("$current${settingsNotifier.unitString}", style: TextStyle(fontSize: 80, fontWeight: FontWeight.w300, color:  theme.primary)),
-                                  Image.network("https://openweathermap.org/img/wn/${forecastState.result["current"]["weather"].first["icon"]}@4x.png", height: 140)
-                              ],
-                          ),
-                          //Text("feels like $like$unit", style: const TextStyle(color: Colors.blueGrey, fontSize: 14, fontWeight: FontWeight.w500)),
-                          Text("${forecastState.result["current"]["weather"].first["description"]}", style: const TextStyle(color: Colors.blueGrey, letterSpacing: 1.4, fontSize: 22, fontWeight: FontWeight.w300)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                    Row(
-                                        children: [
-                                            SvgPicture.asset("files/cloud-bolt-rain.svg", width: 30, colorFilter: const ColorFilter.mode( Colors.blueGrey, BlendMode.srcIn),),
-                                            const SizedBox(width: 8,),
-                                            Text("${forecastState.result["current"]["clouds"]}%", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
-                                        ],
-                                    ),
-                                    const SizedBox(height: 8,),
-                                    const Text("Chance of Rain", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
-                                ],),
-                                const SizedBox(height: 50, child: VerticalDivider(color: Colors.blueGrey, thickness: 2,)),
-                                Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                    Row(
-                                        children: [
-                                            SvgPicture.asset("files/leaf.svg", width: 30, colorFilter: const ColorFilter.mode( Colors.blueGrey, BlendMode.srcIn),),
-                                            const SizedBox(width: 3,),
-                                            Text("${forecastState.result["current"]["wind_speed"]}\u33A7", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
-                                        ],
-                                    ),
-                                    const SizedBox(height: 8,),
-                                    const Text("Wind Speed", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
-                                ],),
-                                const SizedBox(height: 50, child: VerticalDivider(color: Colors.blueGrey, thickness: 2,)),
-                                Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                                    Row(
-                                        children: [
-                                            const Icon(Icons.water_drop_outlined, color: Colors.blueGrey, size: 32,),
-                                            const SizedBox(width: 3,),
-                                            Text("${forecastState.result["current"]["humidity"]}%", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
-                                        ],
-                                    ),
-                                    const SizedBox(height: 8,),
-                                    const Text("Humidity", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
-                                ],)
-                            ],),
-                          )
-                      ],
-                    )),
+            Current current = cityState.city.forecast!.current;
+
+            WeatherCode weatherCode = WeatherCode.decode(code: current.weather_code, isNight: !current.is_day);
+
+            String time = formatTime(time: current.time, timezone: (cityState.city.forecast!.utc_offset_seconds / 3600).ceil());
+
+            return LiquidPullRefresh(
+                onRefresh: () async{ await weatherCubit.reloadCityForecast(cityState); },
+                showChildOpacityTransition: false,
+                backgroundColor: theme.surface,
+                animSpeedFactor: 2.0,
+                color: theme.primary,
+                heightLoader: 80,
+                height: 80,
+                showDroplet: true,
+                springAnimationDurationInMilliseconds: 400,
+                key: refreshIndicatorKey,
+                child: SingleChildScrollView(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      Padding(
+                          padding: const EdgeInsets.only(top: 50),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+                              Text(cityState.city.name, style: TextStyle(color: theme.primary, fontSize: 36, fontWeight: FontWeight.w300)),
+                              Text(cityState.city.country, style: const TextStyle(color: Colors.blueGrey, fontSize: 16, fontWeight: FontWeight.w300)),
+                              const SizedBox(height: 10,),
+                              Text(formatDate(DateTime.now()) , style: TextStyle(color: theme.onSurface, fontSize: 18, fontWeight: FontWeight.w300)),
+                              const SizedBox(height: 4),
+                              Text(time, style: TextStyle(color: theme.onSurface, fontSize: 18, fontWeight: FontWeight.w300)),
+                              Row(mainAxisSize: MainAxisSize.min, children: [
+                                  Text("${current.temperature.value.ceil()}${current.temperature.unit}", style: GoogleFonts.fuzzyBubbles(fontSize: 80, fontWeight: FontWeight.w300, color:  theme.primary)),
+                                  SvgPicture.asset(weatherCode.image, height: 160)
+                              ]),
+                              Text("feels like ${current.apparent_temperature.value}${current.apparent_temperature.unit}", style: const TextStyle(color: Colors.blueGrey, fontSize: 16, fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: Text(weatherCode.description, textAlign: TextAlign.center, style: const TextStyle(color: Colors.blueGrey, letterSpacing: 1.4, fontSize: 18, fontWeight: FontWeight.w600)),),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                      Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                          Row(children: [
+                                              SvgPicture.asset("files/cloud-bolt-rain.svg", width: 30, colorFilter: const ColorFilter.mode( Colors.blueGrey, BlendMode.srcIn),),
+                                              const SizedBox(width: 8,),
+                                              Text("${current.rain.value.ceil()}${current.rain.unit}", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
+                                          ]),
+                                          const SizedBox(height: 8,),
+                                          const Text("Rain Sum", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
+                                      ]),
+                                      const SizedBox(height: 50, child: VerticalDivider(color: Colors.blueGrey, thickness: 2,)),
+                                      Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                          Row(children: [
+                                              SvgPicture.asset("files/leaf.svg", width: 30, colorFilter: const ColorFilter.mode( Colors.blueGrey, BlendMode.srcIn),),
+                                              const SizedBox(width: 3,),
+                                              Text("${current.wind_speed.value.ceil()}${current.wind_speed.unit}", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
+                                          ]),
+                                          const SizedBox(height: 8,),
+                                          const Text("Wind Speed", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
+                                      ]),
+                                      const SizedBox(height: 50, child: VerticalDivider(color: Colors.blueGrey, thickness: 2,)),
+                                      Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                                          Row(children: [
+                                              const Icon(Icons.water_drop_outlined, color: Colors.blueGrey, size: 32,),
+                                              const SizedBox(width: 3,),
+                                              Text("${current.relative_humidity.value.ceil()}${current.relative_humidity.unit}", style: const TextStyle(fontSize: 22, color: Colors.blueGrey),),
+                                          ]),
+                                          const SizedBox(height: 8,),
+                                          const Text("Humidity", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),)
+                                      ],)
+                                  ],),
+                              )
+                          ]),
+                      ),
+                      const SizedBox(height: 10,),
+                      Others( city: cityState.city),
+                      Padding(
+                        padding: const EdgeInsets.symmetric( horizontal: 10),
+                        child: GridView.count(crossAxisCount: 2, physics: const NeverScrollableScrollPhysics(), shrinkWrap: true,
+                        crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 2.4,
+                        children: [
+                            Details(title: "Wind Direction", info: "${current.wind_direction.value}${current.wind_direction.unit}", iconAsset: "noto--compass.svg"),
+                            Details(title: "Wind Guts", info: "${current.wind_gusts.value}${current.wind_gusts.unit}", iconAsset: "fluent-emoji-flat--leaf-fluttering-in-wind.svg"),
+                            Details(title: "Rain", info: "${cityState.city.forecast?.hourly[DateTime.now().hour].rain.value.ceil()}${cityState.city.forecast?.hourly[DateTime.now().hour].rain.unit}", iconAsset: "emojione--umbrella-with-rain-drops.svg"),
+                            Details(title: "Pressure", info: "${current.surface_pressure.value.ceil()}${current.surface_pressure.unit}", iconAsset: "emojione--stopwatch.svg"),
+                            Details(title: "Cloud Cover", info: "${current.cloud_cover.value}${current.cloud_cover.unit}", iconAsset: "emojione--sun-behind-cloud.svg"),
+                            Details(title: "Precipitation", info: "${current.precipitation.value.ceil()}${current.precipitation.unit}", iconAsset: "twemoji--droplet.svg"),
+                        ]),
+                      ),
+                      const SizedBox(height: 12,)
+                  ]),
                 ),
-                const SizedBox(height: 15,),
-                Others( daily: forecastState.result["daily"], hourly: forecastState.result["hourly"], )
-            ],
-        );
+            );
+        });
+    }
+
+    @override
+    void dispose() {
+        super.dispose();
     }
 }

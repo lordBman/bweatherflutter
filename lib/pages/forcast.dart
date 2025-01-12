@@ -2,60 +2,52 @@ import 'dart:async';
 
 import 'package:bweatherflutter/components/error.dart';
 import 'package:bweatherflutter/components/forcast.dart';
-//import 'package:bweatherflutter/components/loading.dart';
-import 'package:bweatherflutter/providers/main.dart';
-import 'package:bweatherflutter/providers/weather.dart';
-import 'package:card_swiper/card_swiper.dart';
+import 'package:bweatherflutter/states/forecast/weather_state.dart';
+import 'package:bweatherflutter/states/main_cubit.dart';
+import 'package:bweatherflutter/states/weather_cubit.dart';
+import 'package:bweatherflutter/utils/status.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-class ForcastPage extends StatefulWidget{
-    const ForcastPage({ super.key });
+class ForecastPage extends StatefulWidget{
+    const ForecastPage({ super.key });
 
     @override
-    State<StatefulWidget> createState()=> __ForcastPage();
+    State<StatefulWidget> createState()=> __ForecastPage();
 }
 
-class __ForcastPage extends State<ForcastPage>{
-    late WeatherNotifer weatherNotifer;
-    late MainProvider mainProvider;
+class __ForecastPage extends State<ForecastPage>{
+    late WeatherCubit weatherCubit;
     late StreamSubscription<List<ConnectivityResult>> subscription;
-
-    Future<void> refresh() async => weatherNotifer.reload();
 
     @override
     void initState() {
         super.initState();
         subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
             if (result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.ethernet)) {
-                weatherNotifer.reload();
+                weatherCubit.reload();
             }
         });
     }
 
     @override
     Widget build(BuildContext context) {
-        weatherNotifer = Provider.of<WeatherNotifer>(context, listen: true);
-        mainProvider = Provider.of<MainProvider>(context, listen: true);
+        weatherCubit = context.read<WeatherCubit>();
 
-        /*if(weatherNotifer.loading){
-            return Loading(message: weatherNotifer.message);
-        }*/
+        return BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state){
+            if(state.status.isFailure){
+                return const ErrorView(message: "Encountered an unexpected error, check your internet connection");
+            }
 
-        if(weatherNotifer.isError){
-            return const ErrorView(message: "Encontered an unexpected error, check your internet connection");
-        }
-
-        return Swiper(
-            loop: false, index: mainProvider.index,
-            indicatorLayout:PageIndicatorLayout.DROP,
-            itemBuilder: (context, index){ return LiquidPullToRefresh(
-                onRefresh: refresh,
-                showChildOpacityTransition: true,
-                child: ForecastView(index: index)); 
-            },
-            itemCount: weatherNotifer.savedCities.length,);
+            return BlocBuilder<MainCubit, MainState>(
+                builder: (context, mainState) {
+                    return PageView.builder(
+                        controller: PageController(initialPage: mainState.index),
+                        itemBuilder: (context, index) => ForecastView(index: index - 1),
+                        itemCount: state.cities.length + 1);
+                }
+            );
+        });
     }
 }

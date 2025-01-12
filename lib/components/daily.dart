@@ -1,11 +1,12 @@
-import 'package:bweatherflutter/providers/settings.dart';
+import 'package:bweather_repository/bweather_repository.dart';
 import 'package:bweatherflutter/utils/utils.dart';
+import 'package:bweatherflutter/utils/weather_codes.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DailyView extends StatefulWidget{
-    final dynamic daily;
-    
+    final Daily daily;
+
     const DailyView({super.key,  required this.daily });
 
     @override
@@ -13,21 +14,24 @@ class DailyView extends StatefulWidget{
 }
 
 class _DailyViewState extends State<DailyView> {
-    late SettingsNotifier settingsNotifier;
 
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
-        settingsNotifier = Provider.of<SettingsNotifier>(context, listen: true);
 
-        int current = settingsNotifier.value(widget.daily["temp"]["day"]);
+        int weatherCode = widget.daily.weather_code;
+        DateTime time = widget.daily.time;
+        String tempUnit = widget.daily.apparent_temperature_max.unit;
+
+        int min = widget.daily.temperature_min.value.ceil();
+        int max = widget.daily.temperature_max.value.ceil();
 
         return Column(
             mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-                Text(day(DateTime.fromMillisecondsSinceEpoch(widget.daily["dt"] * 1000).weekday), style: TextStyle(color: theme.onSurface, fontWeight: FontWeight.w400),),
-                Image.network("https://openweathermap.org/img/wn/${widget.daily["weather"].first["icon"]}@2x.png", height: 90, width: 100,),
-                Text("$current${settingsNotifier.unitString}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.blueGrey)),
+                Text(day(time.weekday), style: TextStyle(color: theme.onSurface, fontWeight: FontWeight.bold),),
+                SvgPicture.asset(WeatherCode.decode(code: weatherCode, isNight: false).image, width: 100, height: 90),
+                Text("$min-$max$tempUnit", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300, color: Colors.blueGrey)),
             ],
         );
     }
