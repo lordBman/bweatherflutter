@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bweather_repository/bweather_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -228,7 +226,7 @@ void main() {
             });
 
             test('returns weather on valid response', () async {
-                final json = jsonDecode(__resultResponse);
+                //final json = jsonDecode(__resultResponse);
 
                 final response = MockResponse();
                 when(() => response.statusCode).thenReturn(200);

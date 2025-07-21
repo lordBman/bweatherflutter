@@ -58,6 +58,23 @@ class __SettingsState extends State<Settings>{
                                 ),
                             ),
                         ),
+                        /*Padding(
+                            padding:  const EdgeInsets.only(left: 20, right: 20, top: 10),
+                            child: DecoratedBox(decoration: BoxDecoration(color: theme.surfaceContainerHighest, borderRadius: const BorderRadius.all(Radius.circular(10))),
+                                child: Padding(padding: const EdgeInsets.all(8),
+                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                        Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                                            Text("Enable Precise Location", style: TextStyle(color: theme.primary, fontSize: 16, fontWeight: FontWeight.w500),),
+                                            Switch(value: state.preciseLocation, onChanged: (_) => settingsCubit.togglePreciseLocation())
+                                        ],),
+                                        RichText(text: TextSpan(style: TextStyle(fontSize: 14, color: theme.onSurfaceVariant), children: [
+                                            TextSpan(style: GoogleFonts.aBeeZee(fontWeight: FontWeight.bold), text: "Note: "),
+                                            TextSpan(style: GoogleFonts.fuzzyBubbles(), text: "Turning on Precise Location requires Location permission to be turned on, and takes longer to determine user location")
+                                        ]))
+                                    ])
+                                )
+                            )
+                        ),*/
                         Padding(
                             padding:  const EdgeInsets.only(left: 20, right: 20, top: 10),
                             child: DecoratedBox(

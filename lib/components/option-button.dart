@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class OptionButton extends StatelessWidget{
     final bool active;
@@ -59,7 +60,7 @@ class __OptionState extends State<Option>{
     @override
     Widget build(BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.only(right: 10),
+          padding: EdgeInsets.symmetric(horizontal: ResponsiveBreakpoints.of(context).isDesktop ? 20 : 10),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
               LeftOptionButton(active: active == "daily", text: "Daily", onPressed: toDaily),
               RightOptionButton(active: active == "hourly", text: "Hourly", onPressed: toHourly)

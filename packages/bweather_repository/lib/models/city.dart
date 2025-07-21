@@ -7,11 +7,12 @@ import 'package:equatable/equatable.dart';
 class City extends Equatable{
     final String name, country;
     final String timezone;
-    final double elevation, latitude, longitude;
+    final double? elevation;
+    final double latitude, longitude;
 
     final Forecast? forecast; 
 
-    const City({ required this.name, required this.elevation, this.timezone = "auto", required this.country, required this.latitude, required this.longitude, this.forecast });
+    const City({ required this.name, this.elevation, this.timezone = "auto", required this.country, required this.latitude, required this.longitude, this.forecast });
 
     factory City.fromJson(dynamic json) {
         final init = json["forecast"] != null ? Forecast.fromJson(json["forecast"]) : null;

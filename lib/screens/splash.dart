@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:bweatherflutter/components/error.dart';
-import 'package:bweatherflutter/screens/main.dart';
 import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';
@@ -39,22 +37,21 @@ class __SplashState extends State<Splash> with AfterLayoutMixin<Splash>{
                 child: BlocBuilder<WeatherCubit, WeatherState>(
                   builder: (context, state){
                       return IndexedStack(index: state.status.isFailure ? 1 : 0, children: [
-                          Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.max,
+                          Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.max,
                               children: [
                                   Expanded(child: Center(child: Lottie.asset("files/animations/Animation - 1730523394311.json", width: 300,))),
-                                  Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                        children: [
-                                            const SizedBox(width: 40, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)),
-                                            const SizedBox(height: 10,),
-                                            Text(state.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300, color: Colors.grey),),
-                                        ],
-                                    ),
+                                  Padding(padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                          children: [
+                                              const SizedBox(width: 40, child: LoadingIndicator(indicatorType: Indicator.ballTrianglePathColored, colors: [Colors.orange],)),
+                                              const SizedBox(height: 10,),
+                                              Text(state.message, style: const TextStyle( fontSize: 14, fontWeight: FontWeight.w300, color: Colors.grey),),
+                                          ],
+                                      ),
                                   ),
                               ],
                           ),
-                          ErrorView(message: state.message)
+                          Center(child: ErrorView(message: state.message))
                       ],);
                   }),
             ),

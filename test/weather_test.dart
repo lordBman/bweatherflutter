@@ -4,11 +4,9 @@ import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/settings_cubit.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'helpers.dart';
 

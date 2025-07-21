@@ -9,13 +9,13 @@ import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/main_cubit.dart';
 import 'package:bweatherflutter/states/settings_cubit.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
-import 'package:bweatherflutter/utils/status.dart';
 import 'package:bweatherflutter/utils/theme.dart';
 import 'package:bweatherflutter/utils/utils.dart';
 
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import 'screens/main.dart';
 
@@ -94,6 +94,14 @@ class BWeather extends StatelessWidget {
                         darkTheme: theme.dark(),
                         themeMode: state.themeModeValue,
                         initialRoute: MainScreen.routeName,
+                        builder: (context, child) => ResponsiveBreakpoints.builder(
+                            breakpoints: [
+                                const Breakpoint(start: 0, end: 450, name: MOBILE),
+                                const Breakpoint(start: 451, end: 800, name: TABLET),
+                                const Breakpoint(start: 801, end: double.infinity, name: DESKTOP),
+                            ],
+                            child: child!,
+                        ),
                         onGenerateRoute: (settings) {
                             return MaterialPageRoute(builder: (context) {
                                 return BlocBuilder<WeatherCubit, WeatherState>(
@@ -124,7 +132,7 @@ class BWeather extends StatelessWidget {
 
 void main()async {
     WidgetsFlutterBinding.ensureInitialized();
-    HydratedBloc.storage = await HydratedStorage.build(storageDirectory: await getTemporaryDirectory());
+    HydratedBloc.storage = await HydratedStorage.build(storageDirectory: HydratedStorageDirectory((await getTemporaryDirectory()).path));
     Bloc.observer = const SimpleBlocObserver();
     runApp(const App());
 }

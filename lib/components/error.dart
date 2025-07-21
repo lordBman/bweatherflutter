@@ -9,12 +9,13 @@ class ErrorView extends StatelessWidget{
     @override
     Widget build(BuildContext context) {
         final ColorScheme theme = Theme.of(context).colorScheme;
+
         return Column(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
                 Lottie.asset('files/animations/Not found.json', width: 200, fit: BoxFit.fitWidth),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: theme.error, fontSize: 14, fontWeight: FontWeight.w300, letterSpacing: 1.4,),),
+                  child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: theme.error, fontSize: 14, fontWeight: FontWeight.w300, letterSpacing: 1.4)),
                 )
-        ],);
+        ]);
     }
 }

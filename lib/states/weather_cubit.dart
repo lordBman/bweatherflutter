@@ -8,9 +8,9 @@ import 'package:bweatherflutter/states/settings_cubit.dart';
 import 'package:bweatherflutter/utils/status.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+
 
 class WeatherCubit extends HydratedCubit<WeatherState>{
     final ForecastRepository __repository;
@@ -36,30 +36,26 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
             if (result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.ethernet)) {
                 if(state.status.isFailure){
-                    init();
+                    __init();
                 }else{
                     reload();
                 }
             }
         });
-        init();
+        __init();
     }
 
-    Future<void> init () async{
+    Future<void> __init () async{
         __initForecast();
         emit(state.copy(status: StateStatus.loading, message: "Getting user current location"));
 
         try{
-            final position = await __determinePosition();
-            if(position != null){
-                final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-
-                log("looking positional data of ${placemarks[0].locality!}");
-                List<City> list =  await __repository.search(placemarks[0].locality!);
-                if(state.location != null && state.location!.city.country != list.first.country && state.location!.city.name != list.first.name){
+            final location = await __determinePosition();
+            if(location != null){
+                if(state.location != null && state.location!.city.country == location.country && state.location!.city.name == location.name){
                     emit(state.copy(status: StateStatus.success));
                 }else{
-                    emit(state.copy(location: CityState(city: list.first), status: StateStatus.success));
+                    emit(state.copy(location: CityState(city: location), status: StateStatus.success));
                     __initForecast();
                 }
             }else{
@@ -71,7 +67,23 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
         }
     }
 
-    Future<Position?> __determinePosition() async {
+    Future<void> refetchLocation() async{
+        try{
+            final location = await __determinePosition();
+            if(location != null){
+                if(state.location == null || (state.location!.city.country != location.country && state.location!.city.name != location.name)){
+                    emit(state.copy(location: CityState(city: location), status: StateStatus.success));
+                    __initForecast();
+                }
+            }else if(state.location == null){
+                emit(state.copy(error: "", status: StateStatus.failure, message: "unable to determine your current location"));
+            }
+        }catch(error){
+            log("location error:", error: error);
+        }
+    }
+
+    Future<City?> __determinePosition() async {
         bool serviceEnabled;
         LocationPermission permission;
 
@@ -95,10 +107,10 @@ class WeatherCubit extends HydratedCubit<WeatherState>{
             return Future.error('Location permissions are permanently denied, we cannot request permissions.');
         }
 
-        if(permission == LocationPermission.always || permission == LocationPermission.whileInUse){
-            return await Geolocator.getCurrentPosition();
-        }
-        return null;
+        Position position = await Geolocator.getCurrentPosition();
+        log("looking positional data of ${position.latitude}, ${position.longitude}");
+
+        return (await __repository.get(latitude: position.latitude, longitude: position.longitude));
     }
 
     void __updateCity(int index, CityState cityState){

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:bweather_repository/bweather_repository.dart';
@@ -7,6 +8,9 @@ import 'package:bweather_open_meteo_api/bweather_open_meteo_api.dart' as api;
 import 'package:bweather_repository/models/city.dart' as city_model;
 import 'package:bweather_repository/models/forecast.dart' as models;
 import 'package:bweather_repository/units.dart';
+
+import 'package:nominatim_flutter/model/request/request.dart';
+import 'package:nominatim_flutter/nominatim_flutter.dart';
 
 class ForecastRepository {
     final api.WeatherClient __client;
@@ -73,5 +77,31 @@ class ForecastRepository {
             name: location.name, country: location.country, elevation: location.elevation,
             timezone: location.timezone, latitude: location.latitude, longitude: location.longitude
         )).toList();
+    }
+
+    Future<city_model.City> get({ required double latitude, required double longitude }) async{
+        final reverseRequest = ReverseRequest(lat: latitude, lon: longitude, extraTags: false, nameDetails: false);
+
+        final reverseResult = await NominatimFlutter.instance.reverse(
+            reverseRequest: reverseRequest,
+            language: 'en-US,en;q=0.5', // Specify the desired language(s) here
+        );
+
+        log("looking DisplayName data of ${reverseResult.displayName}");
+        log("looking address data of ${jsonEncode(reverseResult.address)}");
+        log("looking category of ${reverseResult.category}");
+
+        return (await search(reverseResult.address!["city"])).first;
+    }
+
+    Future<city_model.City> location() async{
+        final location = await __client.currentLocation();
+
+        log("Looking for your current  $location");
+
+        return city_model.City(
+            name: location.name, country: location.country, elevation: location.elevation,
+            timezone: location.timezone, latitude: location.latitude, longitude: location.longitude
+        );
     }
 }

@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:bweather_repository/models/city.dart';
 import 'package:bweather_repository/models/forecast.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equatable/equatable.dart';
 
 // Assuming City, Forecast, Current, Hourly, Daily, and Value classes are imported here
 

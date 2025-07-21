@@ -23,6 +23,7 @@ class WeatherNotFoundFailure implements Exception {}
 class WeatherClient{
     static const _baseUrlWeather = 'api.open-meteo.com';
     static const _baseUrlGeocoding = 'geocoding-api.open-meteo.com';
+    static const _papiUrl = 'ipapi.co';
 
     final Client _httpClient;
 
@@ -81,5 +82,25 @@ class WeatherClient{
         }
 
         return (locationJson['results'] as List).map((element) => City.fromJson(element)).toList();
+    }
+
+    /// Finds a [City] `/v1/search/?name=(query)`.
+    Future<City> currentLocation() async {
+        final locationRequest = Uri.https(_papiUrl, "/json");
+
+        log(locationRequest.toString());
+        final locationResponse = await _httpClient.get(locationRequest);
+        log(locationResponse.statusCode.toString());
+        log(locationResponse.body);
+        if (locationResponse.statusCode != 200) {
+            throw LocationRequestFailure();
+        }
+
+        final locationJson = jsonDecode(locationResponse.body) as Map<String, dynamic>;
+        if (!locationJson.containsKey('city')){
+            throw LocationNotFoundFailure();
+        }
+
+        return City.fromJson(locationJson);
     }
 }

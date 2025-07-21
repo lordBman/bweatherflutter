@@ -1,3 +1,4 @@
+import 'package:bweatherflutter/components/locatiions.dart';
 import 'package:bweatherflutter/components/location.dart';
 import 'package:bweatherflutter/states/forecast/weather_state.dart';
 import 'package:bweatherflutter/states/main_cubit.dart';
@@ -64,21 +65,7 @@ class __LocationsState extends State<Locations>{
                   showDroplet: true,
                   springAnimationDurationInMilliseconds: 400,
                   key: widget.refreshIndicatorKey,
-                  child: BlocBuilder<WeatherCubit, WeatherState>(
-                      builder: (context, state) {
-                          return ListView.separated(
-                              controller: __scrollController,
-                              padding: const EdgeInsets.only(top: 20, bottom: 20),
-                              itemCount: state.cities.length + 1,
-                              separatorBuilder: (context, index) => const SizedBox(height: 15),
-                              itemBuilder: (context, index) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                                  child: LocationItem(index: index - 1),
-                              ),
-                              //separatorBuilder: (context, index) => const SizedBox(height: 15,),
-                          );
-                      }
-                  ))),
+                  child: LocationsView(scrollController: __scrollController))),
               /*SliverList.s(
                   itemCount: weatherNotifier.savedCities.length,
                   itemBuilder: (context, index) => Padding(

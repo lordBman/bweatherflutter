@@ -46,7 +46,7 @@ class SettingsState {
 
     Map<String, dynamic> toJson() => {
         "temp_unit" : temp_unit.serialize, "wind_speed_unit": wind_speed_unit.serialize,
-        "precipitation_unit": precipitation_unit.serialize, "themeMode" : themeMode
+        "precipitation_unit": precipitation_unit.serialize, "themeMode" : themeMode,
     };
 
     String serialize() => jsonEncode(toJson());

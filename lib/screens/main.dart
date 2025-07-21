@@ -1,15 +1,15 @@
+import 'package:bweatherflutter/components/cities_tab.dart';
 import 'package:bweatherflutter/pages/forcast.dart';
 import 'package:bweatherflutter/pages/locations.dart';
 import 'package:bweatherflutter/pages/settings.dart';
 import 'package:bweatherflutter/states/main_cubit.dart';
 import 'package:bweatherflutter/states/weather_cubit.dart';
-//import 'package:bweatherflutter/utils/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class MainScreen extends StatefulWidget {
     static const String routeName = "main";
-    //final NotificationManager notificationManager = NotificationManager();
 
     const MainScreen({super.key});
 
@@ -18,8 +18,22 @@ class MainScreen extends StatefulWidget {
 }
 
 class __MainScreenState extends State<MainScreen> {
+    bool showSearch = false;
 
-    final List<Widget> pages =  [ const ForecastPage(), Locations(), const Settings()];
+    List<Widget> pages(BuildContext context){
+        bool isMobile = ResponsiveBreakpoints.of(context).isMobile;
+        bool isTablet = ResponsiveBreakpoints.of(context).isTablet;
+
+        return [
+            const ForecastPage(),
+            if(isMobile)...[
+                Locations(), const Settings()
+            ],
+            if(isTablet)...[
+                const Settings()
+            ],
+        ];
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -29,13 +43,28 @@ class __MainScreenState extends State<MainScreen> {
 
         return BlocBuilder<MainCubit, MainState>(
             builder: (context, state) =>  Scaffold(
-                body: pages[state.pageIndex], //backgroundColor: theme.surface,
-                floatingActionButton: Visibility(visible: state.showFAO, child: FloatingActionButton(backgroundColor: theme.secondary,
-                    onPressed: () { Navigator.pushNamed(context, "cities");  }, //widget.notificationManager.showNotification();
-                    child: const Icon(Icons.add_location_alt),
+                body: Row(children: [
+                    Expanded(child: IndexedStack(index: state.pageIndex, children: pages(context))),
+                    if(ResponsiveBreakpoints.of(context).isDesktop) ...[
+                        SizedBox(width: 440, child: CitiesTab(showSearch: showSearch, close: ()=> setState(() { showSearch = false; })),)
+                    ],
+                ]),
+                floatingActionButton: Visibility(
+                    visible: state.showFAO || (ResponsiveBreakpoints.of(context).isDesktop && !showSearch),
+                    child: FloatingActionButton(backgroundColor: theme.secondary,
+                        onPressed: () {
+                            if(ResponsiveBreakpoints.of(context).isDesktop){
+                                setState(() { showSearch = true; });
+                            }else{
+                                Navigator.pushNamed(context, "cities");
+                            }
+                        }, //widget.notificationManager.showNotification();
+                        child: const Icon(Icons.add_location_alt),
                 )),
-                bottomNavigationBar: NavigationBar(
-                    onDestinationSelected: (int index) => mainCubit.pageIndex = index,
+                bottomNavigationBar: ResponsiveBreakpoints.of(context).isMobile ? NavigationBar(
+                    onDestinationSelected: (int index) {
+                        mainCubit.pageIndex = index;
+                    },
                     selectedIndex: state.pageIndex,
                     destinations: const <Widget>[
                         NavigationDestination(selectedIcon: Icon(Icons.cloud, color: Colors.white,), icon: Icon(Icons.cloud_outlined), label: 'Forecast'),
@@ -43,7 +72,7 @@ class __MainScreenState extends State<MainScreen> {
                         NavigationDestination(selectedIcon: Icon(Icons.settings, color: Colors.white,), icon: Icon(Icons.settings_outlined), label: 'Settings'),
                       
                     ],
-                ),
+                ) : null,
             ),
         );
     }

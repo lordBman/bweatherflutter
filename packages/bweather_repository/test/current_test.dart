@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bweather_repository/models/forecast.dart';
 import 'package:flutter_test/flutter_test.dart';
 

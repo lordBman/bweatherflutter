@@ -1,3 +1,4 @@
+import 'package:bweatherflutter/components/cities.dart';
 import 'package:bweatherflutter/components/city.dart';
 import 'package:bweatherflutter/components/search.dart';
 import 'package:bweatherflutter/states/cities_cubit.dart';
@@ -14,25 +15,21 @@ class CitiesScreen extends StatefulWidget{
 }
 
 class __CitiesScreenState extends State<CitiesScreen>{
-    late CitiesCubit citiesCubit;
     int index = 0;
 
     void search(String query){
-      citiesCubit.search(query);
-      if(query.isNotEmpty && index == 0){
-          setState(() {
-              index = 1;
-          });
-      }
+        if(query.isNotEmpty && index == 0){
+            context.read<CitiesCubit>().search(query);
+            setState(() {
+                index = 1;
+            });
+        }
     }
 
-    void cleared(){
-        setState(() { index = 0; });
-    }
+    void cleared() => setState(() { index = 0; });
 
     @override
     Widget build(BuildContext context) {
-        citiesCubit = context.read<CitiesCubit>();
         return Scaffold(
             body: CustomScrollView(
                 slivers: [
@@ -42,15 +39,7 @@ class __CitiesScreenState extends State<CitiesScreen>{
                             title: Search(onSearch: search, cleared: cleared),),),
                     SliverFillRemaining(child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal:  10.0),
-                      child: BlocBuilder<CitiesCubit, CitiesState>(
-                          builder: (context, state) => IndexedStack(index: index , children: [
-                            const CityList(),
-                            ListView.separated(
-                                itemCount: state.searchResults.length, itemBuilder: (context, index)=> CityViewResultItem(city: state.searchResults[index]),
-                                separatorBuilder: (context, index) => const Divider(height: 0.3),
-                            )
-                        ],),
-                      ),
+                      child: CitiesView(index: index)
                     ),)
                 ],
             ),);

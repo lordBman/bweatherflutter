@@ -1,4 +1,6 @@
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,4 +29,12 @@ String formatTime({ required DateTime time, required int timezone }){
     String timezoneFormat = "UTC${timezone >= 0 ? "+" : ""}$timezone";
 
     return "$hourFormat:$minutesFormat$postFormat $timezoneFormat";
+}
+
+bool get isMobile {
+    return Platform.isAndroid || Platform.isIOS;
+}
+
+bool get isDesktop {
+    return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 }

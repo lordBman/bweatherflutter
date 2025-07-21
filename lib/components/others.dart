@@ -3,6 +3,7 @@ import 'package:bweatherflutter/components/daily.dart';
 import 'package:bweatherflutter/components/hourly.dart';
 import 'package:bweatherflutter/components/option-button.dart';
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class Others extends StatefulWidget{
     final City city;
@@ -42,11 +43,14 @@ class __OthersState extends State<Others>{
         theme = Theme.of(context).colorScheme;
 
         return Column(
-            mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: ResponsiveBreakpoints.of(context).isMobile ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
                 Option(onChoose: choose),
                 const SizedBox(height: 12,),
-                SizedBox(height: 180, child: ListView(scrollDirection: Axis.horizontal, children: init(widget.city.forecast!)))
+                SizedBox(height: 180, child: ListView(
+                    padding: ResponsiveBreakpoints.of(context).isDesktop ? EdgeInsets.symmetric(horizontal: 20) : null,
+                    scrollDirection: Axis.horizontal, children: init(widget.city.forecast!)))
             ],
         );
     }
